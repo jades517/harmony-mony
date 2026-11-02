@@ -1,0 +1,44 @@
+import { Trash2 } from 'lucide-react';
+import { formatDate, formatDuration, weekday } from '../lib/format';
+
+export default function TrainingLogList({ memberName, logs }) {
+  const mine = logs.rows.filter((l) => l.member_name === memberName);
+
+  return (
+    <section className="section">
+      <div className="section-title">
+        <div>
+          <span className="eyebrow dark">TRAINING LOG</span>
+          <h2>훈련 기록</h2>
+        </div>
+      </div>
+      <div className="log-list">
+        {!memberName && <div className="empty">이름을 입력하면 내 훈련 기록을 볼 수 있어요.</div>}
+        {memberName && !logs.loading && mine.length === 0 && (
+          <div className="empty">아직 저장한 훈련 기록이 없어요. 훈련 탭에서 기록을 남겨 보세요.</div>
+        )}
+        {mine.map((l) => (
+          <article key={l.id}>
+            <div className="date">
+              <b>{formatDate(l.trained_on)}</b>
+              <span>{weekday(l.trained_on)}요일</span>
+            </div>
+            <div className="log-info">
+              <b>
+                {l.completed}/{l.total} 완료 · {formatDuration(l.duration_seconds)}
+              </b>
+              <p>{l.exercise_names.join(', ') || '체크한 항목 없음'}</p>
+            </div>
+            <button
+              className="icon-btn"
+              title="삭제"
+              onClick={() => confirm('이 기록을 삭제할까요?') && logs.remove(l.id)}
+            >
+              <Trash2 size={16} />
+            </button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
