@@ -73,3 +73,12 @@ input{font:inherit;color:$ink}
 .schedule-picker select:focus{outline:none}
 .schedule-info small+small{margin-top:6px}
 .log-schedule{color:$green !important;font-weight:700}
+
+// ── 로그인 ──
+.auth{max-width:460px;margin-left:auto;margin-right:auto}
+.auth-card{grid-template-columns:1fr}
+.auth-card .form-actions{justify-content:space-between;align-items:center}
+.auth-msg{margin:0;font-size:13px;color:$green;background:#e6f5ed;border-radius:9px;padding:10px 12px;line-height:1.5}
+.auth-msg.error{color:#9a3550;background:#fde8ec}
+.member-bar small{color:#9aa7a2;margin-left:6px;font-size:11px}
+.text-btn.muted{color:#8d9c96}

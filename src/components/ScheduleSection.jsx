@@ -12,7 +12,7 @@ export default function ScheduleSection({
   canAdd = false,
   isPast = false,
   setTab,
-  memberName,
+  me,
   schedules,
   attendances,
   programFor,
@@ -22,13 +22,11 @@ export default function ScheduleSection({
   const [editingId, setEditingId] = useState(null);
   const shown = limit ? items.slice(0, limit) : items;
 
-  const setRsvp = (scheduleId, status) => {
-    if (!memberName) {
-      alert('먼저 위에서 이름을 입력해 주세요.');
-      return;
-    }
-    attendances.upsert({ schedule_id: scheduleId, member_name: memberName, status }, 'schedule_id,member_name');
-  };
+  const setRsvp = (scheduleId, status) =>
+    attendances.upsert(
+      { schedule_id: scheduleId, user_id: me.id, member_name: me.name, status },
+      'schedule_id,user_id',
+    );
 
   const remove = (s) => {
     if (confirm(`'${s.title}' 일정을 삭제할까요? 참석 정보도 함께 삭제돼요.`)) schedules.remove(s.id);
@@ -73,7 +71,7 @@ export default function ScheduleSection({
           }
           const rows = attendances.rows.filter((a) => a.schedule_id === s.id);
           const going = rows.filter((a) => a.status === '참석').map((a) => a.member_name);
-          const mine = rows.find((a) => a.member_name === memberName)?.status;
+          const mine = rows.find((a) => a.user_id === me.id)?.status;
           const program = programFor(s.id);
           return (
             <article className={`schedule${isPast ? ' past' : ''}`} key={s.id}>

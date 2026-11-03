@@ -3,7 +3,7 @@ import { ClipboardList, Settings2, Timer } from 'lucide-react';
 import { formatDate, today, weekday } from '../lib/format';
 
 export default function TrainingSection({
-  memberName,
+  me,
   upcoming,
   trainingScheduleId,
   setTrainingScheduleId,
@@ -22,16 +22,13 @@ export default function TrainingSection({
   const loading = trainingScheduleId ? scheduleExercises.loading : exercises.loading;
 
   const saveLog = async () => {
-    if (!memberName) {
-      alert('먼저 위에서 이름을 입력해 주세요.');
-      return;
-    }
     if (checked.length === 0 && timer.seconds === 0) {
       alert('완료한 훈련을 체크하거나 타이머를 사용한 뒤 저장해 주세요.');
       return;
     }
     const ok = await logs.insert({
-      member_name: memberName,
+      user_id: me.id,
+      member_name: me.name,
       schedule_id: trainingScheduleId,
       trained_on: today(),
       completed: checked.length,

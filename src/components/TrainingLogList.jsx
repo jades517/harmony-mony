@@ -1,8 +1,8 @@
 import { Trash2 } from 'lucide-react';
 import { formatDate, formatDuration, weekday } from '../lib/format';
 
-export default function TrainingLogList({ memberName, logs, schedules }) {
-  const mine = logs.rows.filter((l) => l.member_name === memberName);
+export default function TrainingLogList({ me, logs, schedules }) {
+  const mine = logs.rows.filter((l) => l.user_id === me.id);
 
   return (
     <section className="section">
@@ -13,8 +13,7 @@ export default function TrainingLogList({ memberName, logs, schedules }) {
         </div>
       </div>
       <div className="log-list">
-        {!memberName && <div className="empty">이름을 입력하면 내 훈련 기록을 볼 수 있어요.</div>}
-        {memberName && !logs.loading && mine.length === 0 && (
+        {!logs.loading && mine.length === 0 && (
           <div className="empty">아직 저장한 훈련 기록이 없어요. 훈련 탭에서 기록을 남겨 보세요.</div>
         )}
         {mine.map((l) => (

@@ -14,9 +14,11 @@ export default function Hero({ onCta }) {
           <br />
           우리 팀의 모든 순간을 하모니모니에서.
         </p>
-        <button className="hero-btn" onClick={onCta}>
-          일정 확인하기 <ArrowRight size={17} />
-        </button>
+        {onCta && (
+          <button className="hero-btn" onClick={onCta}>
+            일정 확인하기 <ArrowRight size={17} />
+          </button>
+        )}
       </div>
       <div className="hero-art">
         <div className="orbit one"></div>

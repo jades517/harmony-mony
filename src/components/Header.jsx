@@ -14,19 +14,24 @@ export default function Header({ tab, setTab, memberName }) {
             하모니모니 <small>HARMONY MONY</small>
           </div>
         </div>
-        <nav>
-          {NAV.map((x) => (
-            <button className={tab === x ? 'active' : ''} key={x} onClick={() => setTab(x)}>
-              {x}
+        {/* 로그인 전(setTab 없음)에는 메뉴를 숨김 */}
+        {setTab && (
+          <>
+            <nav>
+              {NAV.map((x) => (
+                <button className={tab === x ? 'active' : ''} key={x} onClick={() => setTab(x)}>
+                  {x}
+                </button>
+              ))}
+            </nav>
+            <button className="avatar" title={memberName}>
+              {memberName.slice(0, 2)}
             </button>
-          ))}
-        </nav>
-        <button className="avatar" title={memberName || '이름 미입력'}>
-          {memberName ? memberName.slice(0, 2) : 'HM'}
-        </button>
-        <button className="hamb" onClick={() => setMenu(!menu)}>
-          {menu ? <X /> : <Menu />}
-        </button>
+            <button className="hamb" onClick={() => setMenu(!menu)}>
+              {menu ? <X /> : <Menu />}
+            </button>
+          </>
+        )}
       </div>
       {menu && (
         <div className="mobile-menu">

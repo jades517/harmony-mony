@@ -1,9 +1,9 @@
 import { CalendarDays, Check, Footprints } from 'lucide-react';
 
-export default function ActivitySection({ memberName, past, upcoming, attendances, checked }) {
+export default function ActivitySection({ me, past, upcoming, attendances, checked }) {
   const pastIds = new Set(past.map((s) => s.id));
   const attended = attendances.rows.filter(
-    (a) => a.member_name === memberName && a.status === '참석' && pastIds.has(a.schedule_id),
+    (a) => a.user_id === me.id && a.status === '참석' && pastIds.has(a.schedule_id),
   ).length;
 
   return (
