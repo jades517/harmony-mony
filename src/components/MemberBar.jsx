@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
-export default function MemberBar({ auth }) {
+export default function MemberBar({ auth, me, onRenamed }) {
   const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(auth.name);
+  const [value, setValue] = useState(me.name);
 
   if (editing) {
     return (
@@ -10,10 +10,14 @@ export default function MemberBar({ auth }) {
         className="member-bar"
         onSubmit={async (e) => {
           e.preventDefault();
-          if (!value.trim()) return;
-          const { error } = await auth.updateName(value.trim());
+          const name = value.trim();
+          if (!name) return;
+          const { error } = await auth.updateName(name);
           if (error) alert(error.message);
-          else setEditing(false);
+          else {
+            await onRenamed(name);
+            setEditing(false);
+          }
         }}
       >
         <span>팀에서 보일 이름을 바꿔요 (이미 남긴 참석·기록의 이름은 그대로예요)</span>
@@ -33,13 +37,15 @@ export default function MemberBar({ auth }) {
   return (
     <div className="member-bar">
       <span>
-        <b>{auth.name}</b> 님으로 로그인 중 <small>{auth.user.email}</small>
+        <b>{me.name}</b> 님으로 로그인 중
+        <em className={`role-badge${me.isAdmin ? ' admin' : ''}`}>{me.isAdmin ? '운영진' : '회원'}</em>
+        <small>{auth.user.email}</small>
       </span>
       <div className="inline-form">
         <button
           className="text-btn"
           onClick={() => {
-            setValue(auth.name);
+            setValue(me.name);
             setEditing(true);
           }}
         >

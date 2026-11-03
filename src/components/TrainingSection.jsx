@@ -51,9 +51,11 @@ export default function TrainingSection({
           <span className="eyebrow dark">TRAINING PROGRAM</span>
           <h2>{totalMinutes}분 훈련</h2>
         </div>
-        <button className="text-btn" onClick={() => openProgramEditor(trainingScheduleId)}>
-          <Settings2 size={16} /> {trainingScheduleId ? '이 일정 훈련 짜기' : '기본 프로그램 편집'}
-        </button>
+        {me.isAdmin && (
+          <button className="text-btn" onClick={() => openProgramEditor(trainingScheduleId)}>
+            <Settings2 size={16} /> {trainingScheduleId ? '이 일정 훈련 짜기' : '기본 프로그램 편집'}
+          </button>
+        )}
       </div>
       <div className="training">
         <label className="schedule-picker">
@@ -89,9 +91,13 @@ export default function TrainingSection({
         {!loading && items.length === 0 && (
           <div className="empty">
             {trainingScheduleId ? '이 일정에는 아직 훈련이 없어요. ' : '기본 프로그램에 항목이 없어요. '}
-            <button className="text-btn inline" onClick={() => openProgramEditor(trainingScheduleId)}>
-              훈련 짜러 가기
-            </button>
+            {me.isAdmin ? (
+              <button className="text-btn inline" onClick={() => openProgramEditor(trainingScheduleId)}>
+                훈련 짜러 가기
+              </button>
+            ) : (
+              '운영진이 준비 중이에요.'
+            )}
           </div>
         )}
         <div className="exercise-list">

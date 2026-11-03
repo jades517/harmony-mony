@@ -527,7 +527,7 @@ footer {
   }
   .hero-art {
     position: absolute;
-    right: -35px;
+    right: 0;
     bottom: 10px;
     opacity: 1;
   }

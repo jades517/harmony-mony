@@ -45,6 +45,7 @@ export default function ScheduleSection({
           </button>
         ) : (
           canAdd &&
+          me.isAdmin &&
           !adding && (
             <button className="primary" onClick={() => setAdding(true)}>
               <Plus size={16} /> 일정 추가
@@ -97,17 +98,19 @@ export default function ScheduleSection({
                     ? `훈련 ${program.length}개 · ${program.reduce((sum, x) => sum + x.minutes, 0)}분`
                     : '훈련 미정'}
                 </small>
-                <div className="row-actions">
-                  <button onClick={() => openProgramEditor(s.id)}>
-                    <ClipboardList size={13} /> 훈련 짜기
-                  </button>
-                  <button onClick={() => setEditingId(s.id)}>
-                    <Pencil size={13} /> 수정
-                  </button>
-                  <button onClick={() => remove(s)}>
-                    <Trash2 size={13} /> 삭제
-                  </button>
-                </div>
+                {me.isAdmin && (
+                  <div className="row-actions">
+                    <button onClick={() => openProgramEditor(s.id)}>
+                      <ClipboardList size={13} /> 훈련 짜기
+                    </button>
+                    <button onClick={() => setEditingId(s.id)}>
+                      <Pencil size={13} /> 수정
+                    </button>
+                    <button onClick={() => remove(s)}>
+                      <Trash2 size={13} /> 삭제
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="rsvp">
                 <span>내 참석 여부</span>

@@ -8,6 +8,7 @@ import SchedulePage from './pages/SchedulePage';
 import TrainingPage from './pages/TrainingPage';
 import RecordsPage from './pages/RecordsPage';
 import ExercisesPage from './pages/ExercisesPage';
+import MembersPage from './pages/MembersPage';
 import useTimer from './hooks/useTimer';
 import useTable from './hooks/useTable';
 import { today } from './lib/format';
@@ -17,7 +18,17 @@ export default function TeamApp({ auth }) {
   const [tab, setTab] = useState('홈');
   const [checked, setChecked] = useState([]);
   const timer = useTimer();
-  const me = { id: auth.user.id, name: auth.name };
+
+  const profiles = useTable('profiles');
+  const notes = useTable('personal_notes', { order: 'updated_at' });
+  const profile = profiles.rows.find((p) => p.id === auth.user.id);
+  // 화면에서 버튼을 숨기는 용도. 실제 권한은 DB(RLS)에서 막음
+  const me = {
+    id: auth.user.id,
+    name: profile?.name || auth.name,
+    isAdmin: profile?.role === 'admin',
+    joinedOn: (profile?.created_at ?? auth.user.created_at).slice(0, 10),
+  };
 
   const schedules = useTable('schedules', { order: 'date' });
   const attendances = useTable('attendances');
@@ -69,15 +80,21 @@ export default function TeamApp({ auth }) {
     openProgramEditor,
     editTarget,
     logs,
+    profiles,
+    notes,
     checked: checkedIds,
     toggleExercise,
     clearChecked: () => setChecked([]),
     timer,
   };
 
-  const error = [schedules, attendances, exercises, scheduleExercises, logs].map((t) => t.error).find(Boolean);
+  const error = [schedules, attendances, exercises, scheduleExercises, logs, profiles, notes]
+    .map((t) => t.error)
+    .find(Boolean);
   // '훈련 편집'은 하위 페이지라 메뉴에서는 들어온 탭을 활성으로 표시
   const navTab = tab === '훈련 편집' ? editTarget.returnTab : tab;
+  // 운영진 전용 화면은 회원에게는 열리지 않도록
+  const page = !me.isAdmin && (tab === '훈련 편집' || tab === '회원') ? '홈' : tab;
 
   return (
     <>
@@ -85,15 +102,16 @@ export default function TeamApp({ auth }) {
       <main className="container">
         <Hero onCta={() => setTab('일정')} />
         {error && <div className="demo-note error">저장소 오류 · {error}</div>}
-        <MemberBar auth={auth} />
-        {tab === '홈' && <HomePage {...shared} />}
-        {tab === '일정' && <SchedulePage {...shared} />}
-        {tab === '훈련' && <TrainingPage {...shared} />}
-        {tab === '기록' && <RecordsPage {...shared} />}
-        {tab === '훈련 편집' && <ExercisesPage {...shared} />}
+        <MemberBar auth={auth} me={me} onRenamed={(name) => profiles.update(me.id, { name })} />
+        {page === '홈' && <HomePage {...shared} />}
+        {page === '일정' && <SchedulePage {...shared} />}
+        {page === '훈련' && <TrainingPage {...shared} />}
+        {page === '기록' && <RecordsPage {...shared} />}
+        {page === '훈련 편집' && <ExercisesPage {...shared} />}
+        {page === '회원' && <MembersPage {...shared} />}
       </main>
       <footer>HARMONY MONY · 함께 뛰는 즐거움</footer>
-      <FloatingMenu tab={navTab} setTab={setTab} />
+      <FloatingMenu tab={navTab} setTab={setTab} isAdmin={me.isAdmin} />
     </>
   );
 }
