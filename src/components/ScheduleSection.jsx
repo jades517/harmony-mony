@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Clock3, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react';
+import { ArrowRight, ClipboardList, Clock3, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import ScheduleForm from './ScheduleForm';
 import { RSVP_OPTIONS } from '../lib/constants';
 import { formatDate, formatTimeRange, weekday } from '../lib/format';
@@ -15,6 +15,8 @@ export default function ScheduleSection({
   memberName,
   schedules,
   attendances,
+  programFor,
+  openProgramEditor,
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -72,6 +74,7 @@ export default function ScheduleSection({
           const rows = attendances.rows.filter((a) => a.schedule_id === s.id);
           const going = rows.filter((a) => a.status === '참석').map((a) => a.member_name);
           const mine = rows.find((a) => a.member_name === memberName)?.status;
+          const program = programFor(s.id);
           return (
             <article className={`schedule${isPast ? ' past' : ''}`} key={s.id}>
               <div className="date">
@@ -90,7 +93,16 @@ export default function ScheduleSection({
                   <Users size={14} />
                   {going.length}명 참석{going.length > 0 && ` · ${going.join(', ')}`}
                 </small>
+                <small>
+                  <ClipboardList size={14} />
+                  {program.length > 0
+                    ? `훈련 ${program.length}개 · ${program.reduce((sum, x) => sum + x.minutes, 0)}분`
+                    : '훈련 미정'}
+                </small>
                 <div className="row-actions">
+                  <button onClick={() => openProgramEditor(s.id)}>
+                    <ClipboardList size={13} /> 훈련 짜기
+                  </button>
                   <button onClick={() => setEditingId(s.id)}>
                     <Pencil size={13} /> 수정
                   </button>

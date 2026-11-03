@@ -1,7 +1,7 @@
 import { Trash2 } from 'lucide-react';
 import { formatDate, formatDuration, weekday } from '../lib/format';
 
-export default function TrainingLogList({ memberName, logs }) {
+export default function TrainingLogList({ memberName, logs, schedules }) {
   const mine = logs.rows.filter((l) => l.member_name === memberName);
 
   return (
@@ -27,6 +27,9 @@ export default function TrainingLogList({ memberName, logs }) {
               <b>
                 {l.completed}/{l.total} 완료 · {formatDuration(l.duration_seconds)}
               </b>
+              {l.schedule_id && (
+                <p className="log-schedule">{schedules.rows.find((s) => s.id === l.schedule_id)?.title ?? '삭제된 일정'}</p>
+              )}
               <p>{l.exercise_names.join(', ') || '체크한 항목 없음'}</p>
             </div>
             <button

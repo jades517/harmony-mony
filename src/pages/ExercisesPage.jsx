@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowUp, Pencil, Plus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowUp, CopyPlus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { formatDate, weekday } from '../lib/format';
 
 function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name ?? '');
@@ -35,14 +36,25 @@ function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   );
 }
 
-export default function ExercisesPage({ setTab, exercises }) {
+// 기본 프로그램(exercises) 또는 특정 일정의 훈련(schedule_exercises) 편집
+export default function ExercisesPage({ setTab, editTarget, schedules, exercises, scheduleExercises, programFor }) {
   const [editingId, setEditingId] = useState(null);
-  const items = exercises.rows;
+  const { scheduleId, returnTab } = editTarget;
+  const schedule = schedules.rows.find((s) => s.id === scheduleId);
+  const table = scheduleId ? scheduleExercises : exercises;
+  const items = programFor(scheduleId);
   const totalMinutes = items.reduce((sum, x) => sum + x.minutes, 0);
 
   const add = (values) => {
     const position = Math.max(0, ...items.map((x) => x.position)) + 1;
-    return exercises.insert({ ...values, position });
+    return table.insert({ ...values, position, ...(scheduleId && { schedule_id: scheduleId }) });
+  };
+
+  const copyDefault = () => {
+    const start = Math.max(0, ...items.map((x) => x.position));
+    return scheduleExercises.insert(
+      exercises.rows.map((x, i) => ({ schedule_id: scheduleId, name: x.name, minutes: x.minutes, position: start + i + 1 })),
+    );
   };
 
   // 바뀐 순서대로 position을 1부터 다시 매김 (값이 겹쳐 있어도 정리됨)
@@ -50,19 +62,25 @@ export default function ExercisesPage({ setTab, exercises }) {
     const next = [...items];
     [next[index], next[index + dir]] = [next[index + dir], next[index]];
     for (const [i, x] of next.entries()) {
-      if (x.position !== i + 1) await exercises.update(x.id, { position: i + 1 });
+      if (x.position !== i + 1) await table.update(x.id, { position: i + 1 });
     }
   };
 
   return (
     <section className="section">
-      <button className="text-btn back" onClick={() => setTab('훈련')}>
-        <ArrowLeft size={16} /> 훈련으로 돌아가기
+      <button className="text-btn back" onClick={() => setTab(returnTab)}>
+        <ArrowLeft size={16} /> 돌아가기
       </button>
       <div className="section-title">
         <div>
-          <span className="eyebrow dark">TRAINING PROGRAM</span>
-          <h2>훈련 프로그램 편집</h2>
+          <span className="eyebrow dark">{scheduleId ? 'SCHEDULE TRAINING' : 'DEFAULT PROGRAM'}</span>
+          <h2>{schedule ? `${schedule.title} 훈련` : scheduleId ? '일정 훈련' : '기본 훈련 프로그램'}</h2>
+          {schedule && (
+            <p className="sub">
+              {formatDate(schedule.date)} ({weekday(schedule.date)}) · {schedule.place || '장소 미정'}
+            </p>
+          )}
+          {!scheduleId && <p className="sub">새 일정의 훈련을 짤 때 불러올 수 있는 기본 구성이에요.</p>}
         </div>
         <span className="pink-tag">
           {items.length}개 항목 · 총 {totalMinutes}분
@@ -72,11 +90,16 @@ export default function ExercisesPage({ setTab, exercises }) {
       <div className="training">
         <b className="form-label">새 훈련 항목 추가</b>
         <ExerciseForm submitLabel={<><Plus size={15} /> 추가</>} onSubmit={add} />
+        {scheduleId && exercises.rows.length > 0 && (
+          <button className="text-btn copy-default" onClick={copyDefault}>
+            <CopyPlus size={15} /> 기본 프로그램 {exercises.rows.length}개 항목 불러오기
+          </button>
+        )}
       </div>
 
       <div className="manage-list">
-        {exercises.loading && <div className="empty">불러오는 중…</div>}
-        {!exercises.loading && items.length === 0 && <div className="empty">훈련 항목이 없어요. 위에서 추가해 주세요.</div>}
+        {table.loading && <div className="empty">불러오는 중…</div>}
+        {!table.loading && items.length === 0 && <div className="empty">훈련 항목이 없어요. 위에서 추가해 주세요.</div>}
         {items.map((x, i) =>
           editingId === x.id ? (
             <div className="manage-row editing" key={x.id}>
@@ -84,7 +107,7 @@ export default function ExercisesPage({ setTab, exercises }) {
                 initial={x}
                 submitLabel="저장"
                 onSubmit={async (values) => {
-                  const ok = await exercises.update(x.id, values);
+                  const ok = await table.update(x.id, values);
                   if (ok) setEditingId(null);
                   return ok;
                 }}
@@ -109,7 +132,7 @@ export default function ExercisesPage({ setTab, exercises }) {
                 <button
                   className="icon-btn danger"
                   title="삭제"
-                  onClick={() => confirm(`'${x.name}' 항목을 삭제할까요?`) && exercises.remove(x.id)}
+                  onClick={() => confirm(`'${x.name}' 항목을 삭제할까요?`) && table.remove(x.id)}
                 >
                   <Trash2 size={15} />
                 </button>

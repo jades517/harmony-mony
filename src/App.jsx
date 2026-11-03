@@ -23,16 +23,33 @@ export default function App() {
   const schedules = useTable('schedules', { order: 'date' });
   const attendances = useTable('attendances');
   const exercises = useTable('exercises', { order: 'position' });
+  const scheduleExercises = useTable('schedule_exercises', { order: 'position' });
   const logs = useTable('training_logs', { order: 'created_at', ascending: false });
-
-  const toggleExercise = (id) =>
-    setChecked((v) => (v.includes(id) ? v.filter((z) => z !== id) : [...v, id]));
-  // 삭제된 항목이 체크 목록에 남지 않도록 현재 프로그램 기준으로 거름
-  const checkedIds = checked.filter((id) => exercises.rows.some((e) => e.id === id));
 
   const now = today();
   const upcoming = schedules.rows.filter((s) => s.date >= now);
   const past = schedules.rows.filter((s) => s.date < now).reverse();
+
+  // scheduleId가 null이면 기본 프로그램, 아니면 해당 일정의 훈련 목록
+  const programFor = (scheduleId) =>
+    scheduleId ? scheduleExercises.rows.filter((x) => x.schedule_id === scheduleId) : exercises.rows;
+
+  // 훈련 탭에서 고른 일정. 직접 고르기 전에는 가장 가까운 예정 일정을 기본값으로 사용
+  const [pickedScheduleId, setPickedScheduleId] = useState(undefined);
+  const trainingScheduleId = pickedScheduleId === undefined ? (upcoming[0]?.id ?? null) : pickedScheduleId;
+  const trainingItems = programFor(trainingScheduleId);
+
+  // 프로그램 편집 페이지 대상 (null = 기본 프로그램) 과 돌아갈 탭
+  const [editTarget, setEditTarget] = useState({ scheduleId: null, returnTab: '훈련' });
+  const openProgramEditor = (scheduleId) => {
+    setEditTarget({ scheduleId, returnTab: tab });
+    setTab('훈련 편집');
+  };
+
+  const toggleExercise = (id) =>
+    setChecked((v) => (v.includes(id) ? v.filter((z) => z !== id) : [...v, id]));
+  // 다른 일정으로 바꾸거나 항목이 삭제되면 해당 체크는 제외
+  const checkedIds = checked.filter((id) => trainingItems.some((e) => e.id === id));
 
   const shared = {
     setTab,
@@ -42,6 +59,16 @@ export default function App() {
     past,
     attendances,
     exercises,
+    scheduleExercises,
+    programFor,
+    trainingScheduleId,
+    setTrainingScheduleId: (id) => {
+      setPickedScheduleId(id);
+      setChecked([]);
+    },
+    trainingItems,
+    openProgramEditor,
+    editTarget,
     logs,
     checked: checkedIds,
     toggleExercise,
@@ -49,9 +76,9 @@ export default function App() {
     timer,
   };
 
-  const error = [schedules, attendances, exercises, logs].map((t) => t.error).find(Boolean);
-  // '훈련 편집'은 훈련 탭의 하위 페이지라 메뉴에서는 훈련을 활성으로 표시
-  const navTab = tab === '훈련 편집' ? '훈련' : tab;
+  const error = [schedules, attendances, exercises, scheduleExercises, logs].map((t) => t.error).find(Boolean);
+  // '훈련 편집'은 하위 페이지라 메뉴에서는 들어온 탭을 활성으로 표시
+  const navTab = tab === '훈련 편집' ? editTarget.returnTab : tab;
 
   return (
     <>
