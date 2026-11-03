@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import MemberBar from './components/MemberBar';
-import BottomNav from './components/BottomNav';
+import FloatingMenu from './components/FloatingMenu';
 import HomePage from './pages/HomePage';
 import SchedulePage from './pages/SchedulePage';
 import TrainingPage from './pages/TrainingPage';
@@ -81,7 +81,7 @@ export default function TeamApp({ auth }) {
 
   return (
     <>
-      <Header tab={navTab} setTab={setTab} memberName={me.name} />
+      <Header setTab={setTab} memberName={me.name} />
       <main className="container">
         <Hero onCta={() => setTab('일정')} />
         {error && <div className="demo-note error">저장소 오류 · {error}</div>}
@@ -93,7 +93,7 @@ export default function TeamApp({ auth }) {
         {tab === '훈련 편집' && <ExercisesPage {...shared} />}
       </main>
       <footer>HARMONY MONY · 함께 뛰는 즐거움</footer>
-      <BottomNav tab={navTab} setTab={setTab} />
+      <FloatingMenu tab={navTab} setTab={setTab} />
     </>
   );
 }
