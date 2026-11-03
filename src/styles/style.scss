@@ -375,32 +375,6 @@ button {
   margin-left: auto;
   color: #8b9792;
 }
-.timer {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #fff4f6;
-  border-radius: 12px;
-  margin-top: 15px;
-  padding: 15px;
-  color: #9b536b;
-}
-.timer b {
-  font-size: 23px;
-  font-variant-numeric: tabular-nums;
-}
-.timer button {
-  background: $pink;
-  color: #623d4a;
-  border-radius: 9px;
-  padding: 9px 15px;
-  font-weight: 800;
-  margin-left: auto;
-}
-.timer .reset {
-  background: white;
-  margin-left: 0;
-}
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1155,4 +1129,16 @@ input {
     gap: 10px;
     padding: 12px 14px;
   }
+}
+
+// ── 나만의 훈련 ──
+.save-log {
+  margin-top: 16px;
+}
+.schedule-picker optgroup {
+  font-weight: 800;
+  color: #7b8a84;
+}
+.log-schedule.private {
+  color: #a55371 !important;
 }

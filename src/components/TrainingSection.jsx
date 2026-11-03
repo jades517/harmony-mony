@@ -1,81 +1,116 @@
 import { useState } from 'react';
-import { ClipboardList, Settings2, Timer } from 'lucide-react';
+import { ClipboardList, Lock, Settings2 } from 'lucide-react';
 import { formatDate, today, weekday } from '../lib/format';
+import { canEditSource, parseSourceKey, sourceKey, sourceTable } from '../lib/programs';
+
+const NEW_PROGRAM = '__new__';
 
 export default function TrainingSection({
   me,
   upcoming,
-  trainingScheduleId,
-  setTrainingScheduleId,
+  trainingSource: source,
+  setTrainingSource,
   trainingItems: items,
   openProgramEditor,
-  scheduleExercises,
   exercises,
+  scheduleExercises,
+  personalPrograms,
+  personalExercises,
   logs,
   checked,
   toggleExercise,
   clearChecked,
-  timer,
 }) {
   const [message, setMessage] = useState('');
   const totalMinutes = items.reduce((sum, x) => sum + x.minutes, 0);
-  const loading = trainingScheduleId ? scheduleExercises.loading : exercises.loading;
+  const loading = sourceTable(source, { exercises, scheduleExercises, personalExercises }).loading;
+  const canEdit = canEditSource(source, me);
+  const isPersonal = source.kind === 'personal';
+  const programTitle = personalPrograms.rows.find((p) => p.id === source.id)?.title;
+
+  const createProgram = async () => {
+    const title = prompt('새 내 훈련 루틴 이름', '내 훈련 루틴')?.trim();
+    if (!title) return;
+    const rows = await personalPrograms.insert({ user_id: me.id, title });
+    if (rows) {
+      const created = { kind: 'personal', id: rows[0].id };
+      setTrainingSource(created);
+      openProgramEditor(created);
+    }
+  };
+
+  const onPick = (e) => {
+    if (e.target.value === NEW_PROGRAM) createProgram();
+    else setTrainingSource(parseSourceKey(e.target.value));
+  };
 
   const saveLog = async () => {
-    if (checked.length === 0 && timer.seconds === 0) {
-      alert('완료한 훈련을 체크하거나 타이머를 사용한 뒤 저장해 주세요.');
+    if (checked.length === 0) {
+      alert('완료한 훈련을 체크한 뒤 저장해 주세요.');
       return;
     }
+    const done = items.filter((x) => checked.includes(x.id));
     const ok = await logs.insert({
       user_id: me.id,
       member_name: me.name,
-      schedule_id: trainingScheduleId,
+      schedule_id: source.kind === 'schedule' ? source.id : null,
+      personal_program_id: isPersonal ? source.id : null,
+      is_private: isPersonal,
       trained_on: today(),
-      completed: checked.length,
+      completed: done.length,
       total: items.length,
-      duration_seconds: timer.seconds,
-      exercise_names: items.filter((x) => checked.includes(x.id)).map((x) => x.name),
+      // 타이머 대신 체크한 항목의 시간 합계
+      duration_seconds: done.reduce((sum, x) => sum + x.minutes, 0) * 60,
+      exercise_names: done.map((x) => x.name),
     });
     if (ok) {
       clearChecked();
-      timer.reset();
       setMessage('오늘의 훈련을 기록했어요!');
       setTimeout(() => setMessage(''), 3000);
     }
   };
 
+  const editLabel = { default: '기본 프로그램 편집', schedule: '이 일정 훈련 짜기', personal: '내 루틴 편집' }[source.kind];
+
   return (
     <section className="section">
       <div className="section-title">
         <div>
-          <span className="eyebrow dark">TRAINING PROGRAM</span>
-          <h2>{totalMinutes}분 훈련</h2>
+          <span className="eyebrow dark">{isPersonal ? 'MY ROUTINE' : 'TRAINING PROGRAM'}</span>
+          <h2>{isPersonal ? `${programTitle ?? '내 훈련'} · ${totalMinutes}분` : `${totalMinutes}분 훈련`}</h2>
         </div>
-        {me.isAdmin && (
-          <button className="text-btn" onClick={() => openProgramEditor(trainingScheduleId)}>
-            <Settings2 size={16} /> {trainingScheduleId ? '이 일정 훈련 짜기' : '기본 프로그램 편집'}
+        {canEdit && (
+          <button className="text-btn" onClick={() => openProgramEditor(source)}>
+            <Settings2 size={16} /> {editLabel}
           </button>
         )}
       </div>
       <div className="training">
         <label className="schedule-picker">
-          <ClipboardList size={16} />
-          <select
-            value={trainingScheduleId ?? ''}
-            onChange={(e) => setTrainingScheduleId(e.target.value || null)}
-          >
-            {upcoming.map((s) => (
-              <option key={s.id} value={s.id}>
-                {formatDate(s.date)} ({weekday(s.date)}) {s.title}
-              </option>
-            ))}
-            <option value="">기본 프로그램 (일정 없이 개인 훈련)</option>
+          {isPersonal ? <Lock size={16} /> : <ClipboardList size={16} />}
+          <select value={sourceKey(source)} onChange={onPick}>
+            <optgroup label="팀 훈련">
+              {upcoming.map((s) => (
+                <option key={s.id} value={sourceKey({ kind: 'schedule', id: s.id })}>
+                  {formatDate(s.date)} ({weekday(s.date)}) {s.title}
+                </option>
+              ))}
+              <option value="default">기본 프로그램</option>
+            </optgroup>
+            <optgroup label="내 훈련 (나만 보기)">
+              {personalPrograms.rows.map((p) => (
+                <option key={p.id} value={sourceKey({ kind: 'personal', id: p.id })}>
+                  🔒 {p.title}
+                </option>
+              ))}
+              <option value={NEW_PROGRAM}>＋ 새 내 훈련 만들기</option>
+            </optgroup>
           </select>
         </label>
         <div className="training-head">
           <div>
             <b>오늘의 훈련 체크리스트</b>
-            <p>기본기를 하나씩 쌓아가요!</p>
+            <p>{isPersonal ? '나만 보는 루틴이에요. 기록도 나만 볼 수 있어요.' : '기본기를 하나씩 쌓아가요!'}</p>
           </div>
           <div className="progress">
             <b>
@@ -90,9 +125,9 @@ export default function TrainingSection({
         {loading && <div className="empty">불러오는 중…</div>}
         {!loading && items.length === 0 && (
           <div className="empty">
-            {trainingScheduleId ? '이 일정에는 아직 훈련이 없어요. ' : '기본 프로그램에 항목이 없어요. '}
-            {me.isAdmin ? (
-              <button className="text-btn inline" onClick={() => openProgramEditor(trainingScheduleId)}>
+            {{ default: '기본 프로그램에 항목이 없어요. ', schedule: '이 일정에는 아직 훈련이 없어요. ', personal: '루틴에 항목이 없어요. ' }[source.kind]}
+            {canEdit ? (
+              <button className="text-btn inline" onClick={() => openProgramEditor(source)}>
                 훈련 짜러 가기
               </button>
             ) : (
@@ -108,14 +143,6 @@ export default function TrainingSection({
               <small>{x.minutes}분</small>
             </label>
           ))}
-        </div>
-        <div className="timer">
-          <Timer size={19} />
-          <b>{timer.display}</b>
-          <button onClick={timer.toggle}>{timer.running ? '일시정지' : '타이머 시작'}</button>
-          <button className="reset" onClick={timer.reset}>
-            초기화
-          </button>
         </div>
         <div className="save-log">
           {message && <span>{message}</span>}

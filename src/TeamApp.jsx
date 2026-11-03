@@ -9,15 +9,14 @@ import TrainingPage from './pages/TrainingPage';
 import RecordsPage from './pages/RecordsPage';
 import ExercisesPage from './pages/ExercisesPage';
 import MembersPage from './pages/MembersPage';
-import useTimer from './hooks/useTimer';
 import useTable from './hooks/useTable';
 import { today } from './lib/format';
+import { DEFAULT_SOURCE, canEditSource } from './lib/programs';
 
 // 로그인한 팀원 화면. 로그인 후에 마운트되므로 데이터도 이때 불러옴
 export default function TeamApp({ auth }) {
   const [tab, setTab] = useState('홈');
   const [checked, setChecked] = useState([]);
-  const timer = useTimer();
 
   const profiles = useTable('profiles');
   const notes = useTable('personal_notes', { order: 'updated_at' });
@@ -34,25 +33,31 @@ export default function TeamApp({ auth }) {
   const attendances = useTable('attendances');
   const exercises = useTable('exercises', { order: 'position' });
   const scheduleExercises = useTable('schedule_exercises', { order: 'position' });
+  const personalPrograms = useTable('personal_programs');
+  const personalExercises = useTable('personal_exercises', { order: 'position' });
   const logs = useTable('training_logs', { order: 'created_at', ascending: false });
 
   const now = today();
   const upcoming = schedules.rows.filter((s) => s.date >= now);
   const past = schedules.rows.filter((s) => s.date < now).reverse();
 
-  // scheduleId가 null이면 기본 프로그램, 아니면 해당 일정의 훈련 목록
-  const programFor = (scheduleId) =>
-    scheduleId ? scheduleExercises.rows.filter((x) => x.schedule_id === scheduleId) : exercises.rows;
+  const programFor = (src) =>
+    src.kind === 'schedule'
+      ? scheduleExercises.rows.filter((x) => x.schedule_id === src.id)
+      : src.kind === 'personal'
+        ? personalExercises.rows.filter((x) => x.program_id === src.id)
+        : exercises.rows;
 
-  // 훈련 탭에서 고른 일정. 직접 고르기 전에는 가장 가까운 예정 일정을 기본값으로 사용
-  const [pickedScheduleId, setPickedScheduleId] = useState(undefined);
-  const trainingScheduleId = pickedScheduleId === undefined ? (upcoming[0]?.id ?? null) : pickedScheduleId;
-  const trainingItems = programFor(trainingScheduleId);
+  // 훈련 탭에서 고른 출처. 직접 고르기 전에는 가장 가까운 예정 일정을 기본값으로 사용
+  const [pickedSource, setPickedSource] = useState(null);
+  const trainingSource =
+    pickedSource ?? (upcoming[0] ? { kind: 'schedule', id: upcoming[0].id } : DEFAULT_SOURCE);
+  const trainingItems = programFor(trainingSource);
 
-  // 프로그램 편집 페이지 대상 (null = 기본 프로그램) 과 돌아갈 탭
-  const [editTarget, setEditTarget] = useState({ scheduleId: null, returnTab: '훈련' });
-  const openProgramEditor = (scheduleId) => {
-    setEditTarget({ scheduleId, returnTab: tab });
+  // 프로그램 편집 페이지 대상과 돌아갈 탭
+  const [editTarget, setEditTarget] = useState({ source: DEFAULT_SOURCE, returnTab: '훈련' });
+  const openProgramEditor = (source) => {
+    setEditTarget({ source, returnTab: tab });
     setTab('훈련 편집');
   };
 
@@ -70,10 +75,12 @@ export default function TeamApp({ auth }) {
     attendances,
     exercises,
     scheduleExercises,
+    personalPrograms,
+    personalExercises,
     programFor,
-    trainingScheduleId,
-    setTrainingScheduleId: (id) => {
-      setPickedScheduleId(id);
+    trainingSource,
+    setTrainingSource: (src) => {
+      setPickedSource(src);
       setChecked([]);
     },
     trainingItems,
@@ -85,16 +92,27 @@ export default function TeamApp({ auth }) {
     checked: checkedIds,
     toggleExercise,
     clearChecked: () => setChecked([]),
-    timer,
   };
 
-  const error = [schedules, attendances, exercises, scheduleExercises, logs, profiles, notes]
+  const error = [
+    schedules,
+    attendances,
+    exercises,
+    scheduleExercises,
+    personalPrograms,
+    personalExercises,
+    logs,
+    profiles,
+    notes,
+  ]
     .map((t) => t.error)
     .find(Boolean);
   // '훈련 편집'은 하위 페이지라 메뉴에서는 들어온 탭을 활성으로 표시
   const navTab = tab === '훈련 편집' ? editTarget.returnTab : tab;
-  // 운영진 전용 화면은 회원에게는 열리지 않도록
-  const page = !me.isAdmin && (tab === '훈련 편집' || tab === '회원') ? '홈' : tab;
+  // 권한 없는 화면은 열리지 않도록 (회원은 내 루틴 편집만 가능)
+  const blocked =
+    (tab === '회원' && !me.isAdmin) || (tab === '훈련 편집' && !canEditSource(editTarget.source, me));
+  const page = blocked ? '홈' : tab;
 
   return (
     <>

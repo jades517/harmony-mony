@@ -73,7 +73,7 @@ export default function ScheduleSection({
           const rows = attendances.rows.filter((a) => a.schedule_id === s.id);
           const going = rows.filter((a) => a.status === '참석').map((a) => a.member_name);
           const mine = rows.find((a) => a.user_id === me.id)?.status;
-          const program = programFor(s.id);
+          const program = programFor({ kind: 'schedule', id: s.id });
           return (
             <article className={`schedule${isPast ? ' past' : ''}`} key={s.id}>
               <div className="date">
@@ -100,7 +100,7 @@ export default function ScheduleSection({
                 </small>
                 {me.isAdmin && (
                   <div className="row-actions">
-                    <button onClick={() => openProgramEditor(s.id)}>
+                    <button onClick={() => openProgramEditor({ kind: 'schedule', id: s.id })}>
                       <ClipboardList size={13} /> 훈련 짜기
                     </button>
                     <button onClick={() => setEditingId(s.id)}>

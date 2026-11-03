@@ -27,13 +27,13 @@ export default function useTable(table, { order = 'created_at', ascending = true
       setError('Supabase가 설정되지 않아 저장할 수 없어요.');
       return false;
     }
-    const { error } = await buildQuery(supabase.from(table));
+    const { data, error } = await buildQuery(supabase.from(table));
     if (error) {
       setError(`${table}: ${error.message}`);
       return false;
     }
     await reload();
-    return true;
+    return data ?? true;
   };
 
   return {
@@ -41,7 +41,8 @@ export default function useTable(table, { order = 'created_at', ascending = true
     loading,
     error,
     reload,
-    insert: (values) => run((q) => q.insert(values)),
+    // 성공 시 추가된 행 배열, 실패 시 false
+    insert: (values) => run((q) => q.insert(values).select()),
     update: (id, values) => run((q) => q.update(values).eq('id', id)),
     remove: (id) => run((q) => q.delete().eq('id', id)),
     upsert: (values, onConflict) => run((q) => q.upsert(values, { onConflict })),

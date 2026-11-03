@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowUp, CopyPlus, Pencil, Plus, Trash2 } from 'lucide-react';
 import { formatDate, weekday } from '../lib/format';
+import { sourceLink, sourceTable } from '../lib/programs';
 
 function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name ?? '');
@@ -36,26 +37,63 @@ function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   );
 }
 
-// 기본 프로그램(exercises) 또는 특정 일정의 훈련(schedule_exercises) 편집
-export default function ExercisesPage({ setTab, editTarget, schedules, exercises, scheduleExercises, programFor }) {
+// 기본 프로그램 / 일정별 훈련 / 나만의 루틴 편집 (출처는 lib/programs.js 참고)
+export default function ExercisesPage({
+  me,
+  setTab,
+  editTarget,
+  schedules,
+  exercises,
+  scheduleExercises,
+  personalPrograms,
+  personalExercises,
+  programFor,
+  setTrainingSource,
+}) {
   const [editingId, setEditingId] = useState(null);
-  const { scheduleId, returnTab } = editTarget;
-  const schedule = schedules.rows.find((s) => s.id === scheduleId);
-  const table = scheduleId ? scheduleExercises : exercises;
-  const items = programFor(scheduleId);
+  const { source, returnTab } = editTarget;
+  const schedule = source.kind === 'schedule' && schedules.rows.find((s) => s.id === source.id);
+  const program = source.kind === 'personal' && personalPrograms.rows.find((p) => p.id === source.id);
+  const table = sourceTable(source, { exercises, scheduleExercises, personalExercises });
+  const items = programFor(source);
   const totalMinutes = items.reduce((sum, x) => sum + x.minutes, 0);
+  const link = { ...sourceLink(source), ...(source.kind === 'personal' && { user_id: me.id }) };
 
   const add = (values) => {
     const position = Math.max(0, ...items.map((x) => x.position)) + 1;
-    return table.insert({ ...values, position, ...(scheduleId && { schedule_id: scheduleId }) });
+    return table.insert({ ...values, position, ...link });
   };
 
   const copyDefault = () => {
     const start = Math.max(0, ...items.map((x) => x.position));
-    return scheduleExercises.insert(
-      exercises.rows.map((x, i) => ({ schedule_id: scheduleId, name: x.name, minutes: x.minutes, position: start + i + 1 })),
+    return table.insert(
+      exercises.rows.map((x, i) => ({ ...link, name: x.name, minutes: x.minutes, position: start + i + 1 })),
     );
   };
+
+  const renameProgram = () => {
+    const title = prompt('루틴 이름', program.title)?.trim();
+    if (title) personalPrograms.update(program.id, { title });
+  };
+
+  const deleteProgram = async () => {
+    if (!confirm(`'${program.title}' 루틴을 삭제할까요? 항목도 함께 삭제돼요. (훈련 기록은 남아요)`)) return;
+    if (await personalPrograms.remove(program.id)) {
+      await personalExercises.reload();
+      setTrainingSource(null);
+      setTab(returnTab);
+    }
+  };
+
+  const header = {
+    default: { eyebrow: 'DEFAULT PROGRAM', title: '기본 훈련 프로그램', sub: '새 일정의 훈련을 짤 때 불러올 수 있는 기본 구성이에요.' },
+    schedule: {
+      eyebrow: 'SCHEDULE TRAINING',
+      title: schedule ? `${schedule.title} 훈련` : '일정 훈련',
+      sub: schedule && `${formatDate(schedule.date)} (${weekday(schedule.date)}) · ${schedule.place || '장소 미정'}`,
+    },
+    personal: { eyebrow: 'MY ROUTINE', title: program?.title ?? '내 훈련', sub: '🔒 나만 볼 수 있는 루틴이에요.' },
+  }[source.kind];
 
   // 바뀐 순서대로 position을 1부터 다시 매김 (값이 겹쳐 있어도 정리됨)
   const move = async (index, dir) => {
@@ -73,14 +111,19 @@ export default function ExercisesPage({ setTab, editTarget, schedules, exercises
       </button>
       <div className="section-title">
         <div>
-          <span className="eyebrow dark">{scheduleId ? 'SCHEDULE TRAINING' : 'DEFAULT PROGRAM'}</span>
-          <h2>{schedule ? `${schedule.title} 훈련` : scheduleId ? '일정 훈련' : '기본 훈련 프로그램'}</h2>
-          {schedule && (
-            <p className="sub">
-              {formatDate(schedule.date)} ({weekday(schedule.date)}) · {schedule.place || '장소 미정'}
-            </p>
+          <span className="eyebrow dark">{header.eyebrow}</span>
+          <h2>{header.title}</h2>
+          {header.sub && <p className="sub">{header.sub}</p>}
+          {program && (
+            <div className="row-actions">
+              <button onClick={renameProgram}>
+                <Pencil size={13} /> 이름 변경
+              </button>
+              <button onClick={deleteProgram}>
+                <Trash2 size={13} /> 루틴 삭제
+              </button>
+            </div>
           )}
-          {!scheduleId && <p className="sub">새 일정의 훈련을 짤 때 불러올 수 있는 기본 구성이에요.</p>}
         </div>
         <span className="pink-tag">
           {items.length}개 항목 · 총 {totalMinutes}분
@@ -90,7 +133,7 @@ export default function ExercisesPage({ setTab, editTarget, schedules, exercises
       <div className="training">
         <b className="form-label">새 훈련 항목 추가</b>
         <ExerciseForm submitLabel={<><Plus size={15} /> 추가</>} onSubmit={add} />
-        {scheduleId && exercises.rows.length > 0 && (
+        {source.kind !== 'default' && exercises.rows.length > 0 && (
           <button className="text-btn copy-default" onClick={copyDefault}>
             <CopyPlus size={15} /> 기본 프로그램 {exercises.rows.length}개 항목 불러오기
           </button>
