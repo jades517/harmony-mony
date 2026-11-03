@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { CalendarDays, ChartNoAxesColumnIncreasing, ClipboardList, House, Menu, UsersRound, X } from 'lucide-react';
-import { NAV } from '../lib/constants';
+import { NAV_LABELS as LABELS, navItems } from '../lib/constants';
 
 const ICONS = { 홈: House, 일정: CalendarDays, 훈련: ClipboardList, 기록: ChartNoAxesColumnIncreasing, 회원: UsersRound };
-const LABELS = { 기록: '마이 보드', 회원: '회원 관리' };
 
 // 오른쪽 아래 플로팅 버튼 — 누르면 메뉴가 위로 펼쳐짐
 export default function FloatingMenu({ tab, setTab, isAdmin }) {
   const [open, setOpen] = useState(false);
-  const items = isAdmin ? [...NAV, '회원'] : NAV;
+  const items = navItems(isAdmin);
 
   useEffect(() => {
     if (!open) return;

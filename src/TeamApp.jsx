@@ -61,6 +61,18 @@ export default function TeamApp({ auth }) {
     setTab('훈련 편집');
   };
 
+  // 새 내 훈련 루틴을 만들고 선택한 뒤 바로 편집 화면으로
+  const createPersonalProgram = async () => {
+    const title = prompt('새 내 훈련 루틴 이름', '내 훈련 루틴')?.trim();
+    if (!title) return;
+    const rows = await personalPrograms.insert({ user_id: me.id, title });
+    if (!rows) return;
+    const created = { kind: 'personal', id: rows[0].id };
+    setPickedSource(created);
+    setChecked([]);
+    openProgramEditor(created);
+  };
+
   const toggleExercise = (id) =>
     setChecked((v) => (v.includes(id) ? v.filter((z) => z !== id) : [...v, id]));
   // 다른 일정으로 바꾸거나 항목이 삭제되면 해당 체크는 제외
@@ -85,6 +97,7 @@ export default function TeamApp({ auth }) {
     },
     trainingItems,
     openProgramEditor,
+    createPersonalProgram,
     editTarget,
     logs,
     profiles,
@@ -116,7 +129,7 @@ export default function TeamApp({ auth }) {
 
   return (
     <>
-      <Header setTab={setTab} memberName={me.name} />
+      <Header tab={navTab} setTab={setTab} memberName={me.name} isAdmin={me.isAdmin} />
       <main className="container">
         <Hero onCta={() => setTab('일정')} />
         {error && <div className="demo-note error">저장소 오류 · {error}</div>}

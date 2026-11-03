@@ -1,9 +1,23 @@
-import { Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { formatDate, weekday } from '../lib/format';
 import { formatMinutes } from '../lib/stats';
 
-export default function TrainingLogList({ me, logs, schedules, personalPrograms }) {
+export default function TrainingLogList({
+  me,
+  logs,
+  schedules,
+  personalPrograms,
+  createPersonalProgram,
+  setTrainingSource,
+  setTab,
+}) {
   const mine = logs.rows.filter((l) => l.user_id === me.id);
+
+  const startRoutine = (id) => {
+    setTrainingSource({ kind: 'personal', id });
+    setTab('훈련');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <section className="section">
@@ -12,6 +26,18 @@ export default function TrainingLogList({ me, logs, schedules, personalPrograms 
           <span className="eyebrow dark">TRAINING LOG</span>
           <h2>훈련 기록</h2>
         </div>
+        <button className="primary soft" onClick={createPersonalProgram}>
+          <Plus size={15} /> 내 훈련 만들기
+        </button>
+      </div>
+      <div className="my-routines">
+        <span>🔒 내 훈련 루틴</span>
+        {personalPrograms.rows.length === 0 && <small>아직 만든 루틴이 없어요. 나만 보는 훈련을 만들어 보세요.</small>}
+        {personalPrograms.rows.map((p) => (
+          <button key={p.id} onClick={() => startRoutine(p.id)} title="이 루틴으로 훈련하기">
+            {p.title}
+          </button>
+        ))}
       </div>
       <div className="log-list">
         {!logs.loading && mine.length === 0 && (

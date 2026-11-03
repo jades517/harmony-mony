@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ClipboardList, Lock, Settings2 } from 'lucide-react';
+import { ClipboardList, Lock, Plus, Settings2 } from 'lucide-react';
 import { formatDate, today, weekday } from '../lib/format';
 import { canEditSource, parseSourceKey, sourceKey, sourceTable } from '../lib/programs';
 
@@ -12,6 +12,7 @@ export default function TrainingSection({
   setTrainingSource,
   trainingItems: items,
   openProgramEditor,
+  createPersonalProgram,
   exercises,
   scheduleExercises,
   personalPrograms,
@@ -28,19 +29,8 @@ export default function TrainingSection({
   const isPersonal = source.kind === 'personal';
   const programTitle = personalPrograms.rows.find((p) => p.id === source.id)?.title;
 
-  const createProgram = async () => {
-    const title = prompt('새 내 훈련 루틴 이름', '내 훈련 루틴')?.trim();
-    if (!title) return;
-    const rows = await personalPrograms.insert({ user_id: me.id, title });
-    if (rows) {
-      const created = { kind: 'personal', id: rows[0].id };
-      setTrainingSource(created);
-      openProgramEditor(created);
-    }
-  };
-
   const onPick = (e) => {
-    if (e.target.value === NEW_PROGRAM) createProgram();
+    if (e.target.value === NEW_PROGRAM) createPersonalProgram();
     else setTrainingSource(parseSourceKey(e.target.value));
   };
 
@@ -79,11 +69,16 @@ export default function TrainingSection({
           <span className="eyebrow dark">{isPersonal ? 'MY ROUTINE' : 'TRAINING PROGRAM'}</span>
           <h2>{isPersonal ? `${programTitle ?? '내 훈련'} · ${totalMinutes}분` : `${totalMinutes}분 훈련`}</h2>
         </div>
-        {canEdit && (
-          <button className="text-btn" onClick={() => openProgramEditor(source)}>
-            <Settings2 size={16} /> {editLabel}
+        <div className="title-actions">
+          {canEdit && (
+            <button className="text-btn" onClick={() => openProgramEditor(source)}>
+              <Settings2 size={16} /> {editLabel}
+            </button>
+          )}
+          <button className="primary soft" onClick={createPersonalProgram}>
+            <Plus size={15} /> 내 훈련 만들기
           </button>
-        )}
+        </div>
       </div>
       <div className="training">
         <label className="schedule-picker">

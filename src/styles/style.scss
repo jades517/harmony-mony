@@ -65,6 +65,22 @@ button {
   letter-spacing: 2px;
   color: #6a8980;
 }
+.head nav {
+  display: flex;
+  margin-left: auto;
+  gap: 8px;
+}
+.head nav button {
+  background: transparent;
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: #6b7772;
+}
+.head nav button.active {
+  background: #e4f5ed;
+  color: $green;
+  font-weight: 800;
+}
 .avatar {
   margin-left: auto;
   display: grid;
@@ -418,6 +434,10 @@ footer {
   .brand-icon {
     font-size: 19px;
     padding: 8px;
+  }
+  // 모바일은 플로팅 메뉴만 사용
+  .head nav {
+    display: none;
   }
   .avatar {
     width: 34px;
@@ -1141,4 +1161,58 @@ input {
 }
 .log-schedule.private {
   color: #a55371 !important;
+}
+
+// ── 헤더 메뉴(PC) 와 아바타 간격 ──
+.head nav + .avatar {
+  margin-left: 0;
+}
+@media (max-width: 700px) {
+  .head nav + .avatar {
+    margin-left: auto;
+  }
+}
+
+// ── 내 훈련 만들기 버튼 / 루틴 목록 ──
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.primary.soft {
+  background: #fce0e6;
+  color: #95576a;
+}
+.my-routines {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #fff4f6;
+  border-radius: 13px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #9b536b;
+}
+.my-routines > span {
+  font-weight: 800;
+  margin-right: 4px;
+}
+.my-routines small {
+  color: #a58a93;
+}
+.my-routines button {
+  background: white;
+  color: #95576a;
+  border: 1px solid #f5d3dc;
+  border-radius: 20px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.my-routines button:hover {
+  background: #fce0e6;
 }
