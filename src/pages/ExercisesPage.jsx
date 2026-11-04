@@ -40,7 +40,7 @@ function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
 // 기본 프로그램 / 일정별 훈련 / 나만의 루틴 편집 (출처는 lib/programs.js 참고)
 export default function ExercisesPage({
   me,
-  setTab,
+  goBack,
   editTarget,
   schedules,
   exercises,
@@ -51,7 +51,7 @@ export default function ExercisesPage({
   setTrainingSource,
 }) {
   const [editingId, setEditingId] = useState(null);
-  const { source, returnTab } = editTarget;
+  const { source } = editTarget;
   const schedule = source.kind === 'schedule' && schedules.rows.find((s) => s.id === source.id);
   const program = source.kind === 'personal' && personalPrograms.rows.find((p) => p.id === source.id);
   const table = sourceTable(source, { exercises, scheduleExercises, personalExercises });
@@ -80,7 +80,7 @@ export default function ExercisesPage({
     if (await personalPrograms.remove(program.id)) {
       await personalExercises.reload();
       setTrainingSource(null);
-      setTab(returnTab);
+      goBack();
     }
   };
 
@@ -105,7 +105,7 @@ export default function ExercisesPage({
 
   return (
     <section className="section">
-      <button className="text-btn back" onClick={() => setTab(returnTab)}>
+      <button className="text-btn back" onClick={goBack}>
         <ArrowLeft size={16} /> 돌아가기
       </button>
       <div className="section-title">

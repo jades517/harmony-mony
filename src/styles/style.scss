@@ -844,30 +844,58 @@ input {
   display: inline-flex;
   font-size: 13px;
 }
-.schedule-picker {
+// 훈련 프로그램 선택: 팀 훈련은 초록, 내 훈련은 파랑
+.program-picker {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.program-group {
+  --tone: #{$green};
+  --tone-soft: #eef8f3;
+  background: var(--tone-soft);
+  border-radius: 14px;
+  padding: 12px;
+}
+.program-group.mine {
+  --tone: #3d86a6;
+  --tone-soft: #f1f9fc;
+}
+.program-group-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f1f9fc;
-  color: #3f7f99;
-  border-radius: 11px;
-  padding: 4px 12px;
-  margin-bottom: 16px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--tone);
+  margin-bottom: 10px;
 }
-.schedule-picker select {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  font: inherit;
+.program-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.program-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  color: $ink;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
   font-size: 14px;
   font-weight: 700;
-  color: $ink;
-  padding: 8px 0;
-  cursor: pointer;
+  text-align: left;
 }
-.schedule-picker select:focus {
-  outline: none;
+.program-chip.active {
+  background: var(--tone);
+  color: white;
+}
+.program-chip.add {
+  background: transparent;
+  border: 1.5px dashed var(--tone);
+  color: var(--tone);
 }
 .schedule-info small + small {
   margin-top: 6px;
@@ -1157,10 +1185,6 @@ input {
 // ── 나만의 훈련 ──
 .save-log {
   margin-top: 16px;
-}
-.schedule-picker optgroup {
-  font-weight: 800;
-  color: #7b8a84;
 }
 .log-schedule.private {
   color: #3d86a6 !important;

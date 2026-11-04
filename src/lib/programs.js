@@ -4,13 +4,8 @@
 //   { kind: 'personal', id }          나만의 루틴 (personal_exercises, 본인만)
 export const DEFAULT_SOURCE = { kind: 'default' };
 
-// <select> 값과 출처 객체 변환
+// 출처를 비교·key로 쓰기 위한 문자열
 export const sourceKey = (src) => (src.kind === 'default' ? 'default' : `${src.kind}:${src.id}`);
-export const parseSourceKey = (key) => {
-  if (key === 'default') return DEFAULT_SOURCE;
-  const [kind, id] = key.split(':');
-  return { kind, id };
-};
 
 export const sameSource = (a, b) => sourceKey(a) === sourceKey(b);
 

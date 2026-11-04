@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import MemberBar from './components/MemberBar';
@@ -15,8 +16,26 @@ import { DEFAULT_SOURCE, canEditSource } from './lib/programs';
 
 // 로그인한 팀원 화면. 로그인 후에 마운트되므로 데이터도 이때 불러옴
 export default function TeamApp({ auth }) {
-  const [tab, setTab] = useState('홈');
+  const [tab, setTabState] = useState('홈');
   const [checked, setChecked] = useState([]);
+
+  // 탭 이동을 브라우저 기록에 남겨서 휴대폰 뒤로가기로 이전 화면에 돌아감
+  useEffect(() => {
+    window.history.replaceState({ tab: '홈' }, '');
+    const onPop = (e) => {
+      setTabState(e.state?.tab ?? '홈');
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const setTab = (next) => {
+    if (next === tab) return;
+    window.history.pushState({ tab: next }, '');
+    setTabState(next);
+  };
+  const goBack = () => window.history.back();
 
   const profiles = useTable('profiles');
   const notes = useTable('personal_notes', { order: 'updated_at' });
@@ -80,6 +99,7 @@ export default function TeamApp({ auth }) {
 
   const shared = {
     setTab,
+    goBack,
     me,
     schedules,
     upcoming,
@@ -134,6 +154,12 @@ export default function TeamApp({ auth }) {
         <Hero onCta={() => setTab('일정')} />
         {error && <div className="demo-note error">저장소 오류 · {error}</div>}
         <MemberBar auth={auth} me={me} onRenamed={(name) => profiles.update(me.id, { name })} />
+        {/* 훈련 편집은 페이지 안에 자체 돌아가기 버튼이 있음 */}
+        {page !== '홈' && page !== '훈련 편집' && (
+          <button className="text-btn back" onClick={goBack}>
+            <ArrowLeft size={16} /> 돌아가기
+          </button>
+        )}
         {page === '홈' && <HomePage {...shared} />}
         {page === '일정' && <SchedulePage {...shared} />}
         {page === '훈련' && <TrainingPage {...shared} />}

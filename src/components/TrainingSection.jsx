@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { ClipboardList, Lock, Plus, Settings2 } from 'lucide-react';
+import { Lock, Plus, Settings2, UsersRound } from 'lucide-react';
 import { formatDate, today, weekday } from '../lib/format';
-import { canEditSource, parseSourceKey, sourceKey, sourceTable } from '../lib/programs';
-
-const NEW_PROGRAM = '__new__';
+import { DEFAULT_SOURCE, canEditSource, sameSource, sourceKey, sourceTable } from '../lib/programs';
 
 export default function TrainingSection({
   me,
@@ -28,10 +26,26 @@ export default function TrainingSection({
   const isPersonal = source.kind === 'personal';
   const programTitle = personalPrograms.rows.find((p) => p.id === source.id)?.title;
 
-  const onPick = (e) => {
-    if (e.target.value === NEW_PROGRAM) createPersonalProgram();
-    else setTrainingSource(parseSourceKey(e.target.value));
-  };
+  // 팀 훈련(초록) / 내 훈련(파랑) 선택 버튼
+  const teamChoices = [
+    ...upcoming.map((s) => ({
+      src: { kind: 'schedule', id: s.id },
+      label: `${formatDate(s.date)} (${weekday(s.date)}) ${s.title}`,
+    })),
+    { src: DEFAULT_SOURCE, label: '기본 프로그램' },
+  ];
+  const myChoices = personalPrograms.rows.map((p) => ({ src: { kind: 'personal', id: p.id }, label: p.title }));
+  const chip = ({ src, label }) => (
+    <button
+      key={sourceKey(src)}
+      type="button"
+      className={`program-chip${sameSource(src, source) ? ' active' : ''}`}
+      aria-pressed={sameSource(src, source)}
+      onClick={() => setTrainingSource(src)}
+    >
+      {label}
+    </button>
+  );
 
   const saveLog = async () => {
     if (checked.length === 0) {
@@ -80,27 +94,25 @@ export default function TrainingSection({
         </div>
       </div>
       <div className="training">
-        <label className="schedule-picker">
-          {isPersonal ? <Lock size={16} /> : <ClipboardList size={16} />}
-          <select value={sourceKey(source)} onChange={onPick}>
-            <optgroup label="팀 훈련">
-              {upcoming.map((s) => (
-                <option key={s.id} value={sourceKey({ kind: 'schedule', id: s.id })}>
-                  {formatDate(s.date)} ({weekday(s.date)}) {s.title}
-                </option>
-              ))}
-              <option value="default">기본 프로그램</option>
-            </optgroup>
-            <optgroup label="내 훈련 (나만 보기)">
-              {personalPrograms.rows.map((p) => (
-                <option key={p.id} value={sourceKey({ kind: 'personal', id: p.id })}>
-                  {p.title}
-                </option>
-              ))}
-              <option value={NEW_PROGRAM}>＋ 새 내 훈련 만들기</option>
-            </optgroup>
-          </select>
-        </label>
+        <div className="program-picker">
+          <div className="program-group team">
+            <span className="program-group-label">
+              <UsersRound size={14} /> 팀 훈련
+            </span>
+            <div className="program-chips">{teamChoices.map(chip)}</div>
+          </div>
+          <div className="program-group mine">
+            <span className="program-group-label">
+              <Lock size={14} /> 내 훈련 · 나만 보기
+            </span>
+            <div className="program-chips">
+              {myChoices.map(chip)}
+              <button type="button" className="program-chip add" onClick={createPersonalProgram}>
+                <Plus size={14} /> 새 루틴
+              </button>
+            </div>
+          </div>
+        </div>
         <div className="training-head">
           <div>
             <b>오늘의 훈련 체크리스트</b>
