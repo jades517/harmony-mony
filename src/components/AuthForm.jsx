@@ -4,6 +4,7 @@ const MESSAGES = {
   'Invalid login credentials': '이메일 또는 비밀번호가 올바르지 않아요.',
   'Email not confirmed': '이메일 인증이 아직 안 됐어요. 받은 메일의 링크를 눌러 주세요.',
   'User already registered': '이미 가입된 이메일이에요. 로그인해 주세요.',
+  'email rate limit exceeded': '지금 가입 요청이 많아요. 잠시 후 다시 시도해 주세요.',
 };
 
 export default function AuthForm({ auth }) {
