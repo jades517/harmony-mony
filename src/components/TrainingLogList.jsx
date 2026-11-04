@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, X } from 'lucide-react';
 import { formatDate, weekday } from '../lib/format';
 import { formatMinutes } from '../lib/stats';
 
@@ -7,7 +7,9 @@ export default function TrainingLogList({
   logs,
   schedules,
   personalPrograms,
+  personalExercises,
   createPersonalProgram,
+  trainingSource,
   setTrainingSource,
   setTab,
 }) {
@@ -17,6 +19,15 @@ export default function TrainingLogList({
     setTrainingSource({ kind: 'personal', id });
     setTab('훈련');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const deleteRoutine = async (p) => {
+    if (!confirm(`'${p.title}' 루틴을 삭제할까요? 항목도 함께 삭제돼요. (훈련 기록은 남아요)`)) return;
+    if (await personalPrograms.remove(p.id)) {
+      await personalExercises.reload();
+      // 훈련 탭에서 이 루틴을 고르고 있었다면 기본값으로
+      if (trainingSource.kind === 'personal' && trainingSource.id === p.id) setTrainingSource(null);
+    }
   };
 
   return (
@@ -31,12 +42,17 @@ export default function TrainingLogList({
         </button>
       </div>
       <div className="my-routines">
-        <span>🔒 내 훈련 루틴</span>
+        <span>내 훈련 루틴</span>
         {personalPrograms.rows.length === 0 && <small>아직 만든 루틴이 없어요. 나만 보는 훈련을 만들어 보세요.</small>}
         {personalPrograms.rows.map((p) => (
-          <button key={p.id} onClick={() => startRoutine(p.id)} title="이 루틴으로 훈련하기">
-            {p.title}
-          </button>
+          <span className="routine-chip" key={p.id}>
+            <button onClick={() => startRoutine(p.id)} title="이 루틴으로 훈련하기">
+              {p.title}
+            </button>
+            <button className="chip-remove" title="루틴 삭제" onClick={() => deleteRoutine(p)}>
+              <X size={13} />
+            </button>
+          </span>
         ))}
       </div>
       <div className="log-list">

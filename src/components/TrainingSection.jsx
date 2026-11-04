@@ -95,7 +95,7 @@ export default function TrainingSection({
             <optgroup label="내 훈련 (나만 보기)">
               {personalPrograms.rows.map((p) => (
                 <option key={p.id} value={sourceKey({ kind: 'personal', id: p.id })}>
-                  🔒 {p.title}
+                  {p.title}
                 </option>
               ))}
               <option value={NEW_PROGRAM}>＋ 새 내 훈련 만들기</option>

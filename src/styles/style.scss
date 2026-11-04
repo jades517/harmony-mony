@@ -1,4 +1,4 @@
-$green: #006b50;
+$green: #108668;
 $mint: #bfe8d8;
 $ice: #a8ddf0;
 $pink: #f5a7b8;
@@ -175,7 +175,7 @@ button {
   letter-spacing: -1px;
 }
 .section-title h2 span {
-  color: $pink;
+  color: $ice;
 }
 .eyebrow.dark {
   color: $green;
@@ -218,14 +218,14 @@ button {
   background: $mint;
 }
 .peach {
-  background: $pink;
+  background: $ice;
   color: #653c4a;
 }
 .peach span {
   color: #704956;
 }
 .ice {
-  background: $ice;
+  background: $pink;
   color: #244c60;
 }
 .ice span {
@@ -321,14 +321,14 @@ button {
 }
 .pink-tag {
   font-size: 11px;
-  background: #fce0e6;
-  color: #95576a;
+  background: #dcf1f9;
+  color: #3f7f99;
   padding: 8px 12px;
   border-radius: 30px;
 }
 .training {
   background: white;
-  border: 1px solid #f0e9e9;
+  border: 1px solid #e4eef2;
   border-radius: 20px;
   padding: 26px;
 }
@@ -348,7 +348,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #a55371;
+  color: #3d86a6;
 }
 .progress b {
   font-size: 24px;
@@ -357,7 +357,7 @@ button {
   font-size: 12px;
 }
 .bar {
-  background: #f5e7ec;
+  background: #e3f2f8;
   border-radius: 8px;
   height: 8px;
   margin: 16px 0;
@@ -365,7 +365,7 @@ button {
 .bar div {
   height: 100%;
   border-radius: 8px;
-  background: $pink;
+  background: $ice;
   transition: width 0.2s;
 }
 .exercise-list {
@@ -374,7 +374,7 @@ button {
   gap: 9px;
 }
 .exercise-list label {
-  border: 1px solid #f0e9e9;
+  border: 1px solid #e4eef2;
   border-radius: 11px;
   padding: 13px;
   display: flex;
@@ -383,7 +383,7 @@ button {
   font-size: 13px;
 }
 .exercise-list input {
-  accent-color: #dd7d9d;
+  accent-color: #5fb8d8;
   width: 17px;
   height: 17px;
 }
@@ -672,7 +672,7 @@ input {
   color: $green;
 }
 .exercise-list .exercise-row {
-  border: 1px solid #f0e9e9;
+  border: 1px solid #e4eef2;
   border-radius: 11px;
   padding: 13px;
   display: flex;
@@ -771,13 +771,13 @@ input {
   align-items: center;
   gap: 12px;
   background: white;
-  border: 1px solid #f0e9e9;
+  border: 1px solid #e4eef2;
   border-radius: 12px;
   padding: 12px 14px;
   font-size: 14px;
 }
 .manage-row.editing {
-  border-color: $pink;
+  border-color: $ice;
 }
 .manage-row.editing form {
   flex: 1;
@@ -786,8 +786,8 @@ input {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #fce0e6;
-  color: #95576a;
+  background: #dcf1f9;
+  color: #3f7f99;
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -848,8 +848,8 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff4f6;
-  color: #9b536b;
+  background: #f1f9fc;
+  color: #3f7f99;
   border-radius: 11px;
   padding: 4px 12px;
   margin-bottom: 16px;
@@ -928,8 +928,11 @@ input {
   flex-direction: column;
   align-items: flex-end;
   gap: 12px;
+  // 닫힌 메뉴 영역이 아래 버튼들의 클릭을 가로막지 않도록 토글 버튼만 클릭 받음
+  pointer-events: none;
 }
 .fab-toggle {
+  pointer-events: auto;
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -1098,7 +1101,7 @@ input {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  color: #a55371;
+  color: #3d86a6;
 }
 .my-notes .goal-head b {
   font-size: 16px;
@@ -1160,7 +1163,7 @@ input {
   color: #7b8a84;
 }
 .log-schedule.private {
-  color: #a55371 !important;
+  color: #3d86a6 !important;
 }
 
 // ── 헤더 메뉴(PC) 와 아바타 간격 ──
@@ -1182,37 +1185,56 @@ input {
   justify-content: flex-end;
 }
 .primary.soft {
-  background: #fce0e6;
-  color: #95576a;
+  background: #dcf1f9;
+  color: #3f7f99;
 }
 .my-routines {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-  background: #fff4f6;
+  background: #f1f9fc;
   border-radius: 13px;
   padding: 12px 14px;
   margin-bottom: 12px;
   font-size: 13px;
-  color: #9b536b;
+  color: #3f7f99;
 }
 .my-routines > span {
   font-weight: 800;
   margin-right: 4px;
 }
 .my-routines small {
-  color: #a58a93;
+  color: #7f9ba6;
 }
 .my-routines button {
   background: white;
-  color: #95576a;
-  border: 1px solid #f5d3dc;
+  color: #3f7f99;
+  border: 1px solid #c9e7f3;
   border-radius: 20px;
   padding: 6px 13px;
   font-size: 13px;
   font-weight: 700;
 }
 .my-routines button:hover {
-  background: #fce0e6;
+  background: #dcf1f9;
+}
+// 루틴 이름 + 삭제(X)를 한 칩으로
+.routine-chip {
+  display: inline-flex;
+}
+.routine-chip button:first-child {
+  border-radius: 20px 0 0 20px;
+  border-right: 0;
+  padding-right: 8px;
+}
+.routine-chip .chip-remove {
+  display: grid;
+  place-items: center;
+  border-radius: 0 20px 20px 0;
+  padding: 6px 10px 6px 6px;
+  color: #8ab4c4;
+}
+.routine-chip .chip-remove:hover {
+  color: #d1435b;
 }
