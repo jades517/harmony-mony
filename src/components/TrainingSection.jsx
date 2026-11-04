@@ -23,7 +23,6 @@ export default function TrainingSection({
   clearChecked,
 }) {
   const [message, setMessage] = useState('');
-  const totalMinutes = items.reduce((sum, x) => sum + x.minutes, 0);
   const loading = sourceTable(source, { exercises, scheduleExercises, personalExercises }).loading;
   const canEdit = canEditSource(source, me);
   const isPersonal = source.kind === 'personal';
@@ -49,8 +48,8 @@ export default function TrainingSection({
       trained_on: today(),
       completed: done.length,
       total: items.length,
-      // 타이머 대신 체크한 항목의 시간 합계
-      duration_seconds: done.reduce((sum, x) => sum + x.minutes, 0) * 60,
+      // 체크한 항목의 횟수 합계
+      total_reps: done.reduce((sum, x) => sum + x.reps, 0),
       exercise_names: done.map((x) => x.name),
     });
     if (ok) {
@@ -67,7 +66,7 @@ export default function TrainingSection({
       <div className="section-title">
         <div>
           <span className="eyebrow dark">{isPersonal ? 'MY ROUTINE' : 'TRAINING PROGRAM'}</span>
-          <h2>{isPersonal ? `${programTitle ?? '내 훈련'} · ${totalMinutes}분` : `${totalMinutes}분 훈련`}</h2>
+          <h2>{isPersonal ? `${programTitle ?? '내 훈련'} · ${items.length}개` : `${items.length}개 훈련`}</h2>
         </div>
         <div className="title-actions">
           {canEdit && (
@@ -135,7 +134,7 @@ export default function TrainingSection({
             <label className="exercise-row" key={x.id}>
               <input type="checkbox" checked={checked.includes(x.id)} onChange={() => toggleExercise(x.id)} />
               <span>{x.name}</span>
-              <small>{x.minutes}분</small>
+              <small>{x.reps}회</small>
             </label>
           ))}
         </div>

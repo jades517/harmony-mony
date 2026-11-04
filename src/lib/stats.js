@@ -6,11 +6,6 @@ const shiftDay = (date, days) => {
   return d.toLocaleDateString('sv-SE');
 };
 
-export const formatMinutes = (seconds) => {
-  const m = Math.round(seconds / 60);
-  return m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분` : `${m}분`;
-};
-
 // 마이 보드 통계 (참석·훈련 기록 기준)
 export function myStats({ me, past, attendances, logs }) {
   const now = today();
@@ -39,7 +34,7 @@ export function myStats({ me, past, attendances, logs }) {
     attended,
     attendanceRate: eligible.length ? Math.round((attended / eligible.length) * 100) : null,
     monthCount: monthLogs.length,
-    monthSeconds: monthLogs.reduce((sum, l) => sum + l.duration_seconds, 0),
+    monthReps: monthLogs.reduce((sum, l) => sum + l.total_reps, 0),
     totalCount: myLogs.length,
     streak,
   };

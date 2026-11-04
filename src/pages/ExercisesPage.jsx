@@ -5,26 +5,26 @@ import { sourceLink, sourceTable } from '../lib/programs';
 
 function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [minutes, setMinutes] = useState(initial?.minutes ?? 10);
+  const [reps, setReps] = useState(initial?.reps ?? 10);
   const [saving, setSaving] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    const ok = await onSubmit({ name: name.trim(), minutes: Number(minutes) });
+    const ok = await onSubmit({ name: name.trim(), reps: Number(reps) });
     setSaving(false);
     if (ok && !initial) {
       setName('');
-      setMinutes(10);
+      setReps(10);
     }
   };
 
   return (
     <form className="inline-form exercise-form" onSubmit={submit}>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="훈련 이름 (예: 1:1 수비 연습)" required autoFocus={Boolean(initial)} />
-      <input type="number" min="1" value={minutes} onChange={(e) => setMinutes(e.target.value)} required />
-      <span>분</span>
+      <input type="number" min="1" value={reps} onChange={(e) => setReps(e.target.value)} required />
+      <span>회</span>
       {onCancel && (
         <button type="button" className="outline" onClick={onCancel}>
           취소
@@ -56,7 +56,6 @@ export default function ExercisesPage({
   const program = source.kind === 'personal' && personalPrograms.rows.find((p) => p.id === source.id);
   const table = sourceTable(source, { exercises, scheduleExercises, personalExercises });
   const items = programFor(source);
-  const totalMinutes = items.reduce((sum, x) => sum + x.minutes, 0);
   const link = { ...sourceLink(source), ...(source.kind === 'personal' && { user_id: me.id }) };
 
   const add = (values) => {
@@ -67,7 +66,7 @@ export default function ExercisesPage({
   const copyDefault = () => {
     const start = Math.max(0, ...items.map((x) => x.position));
     return table.insert(
-      exercises.rows.map((x, i) => ({ ...link, name: x.name, minutes: x.minutes, position: start + i + 1 })),
+      exercises.rows.map((x, i) => ({ ...link, name: x.name, reps: x.reps, position: start + i + 1 })),
     );
   };
 
@@ -126,7 +125,7 @@ export default function ExercisesPage({
           )}
         </div>
         <span className="pink-tag">
-          {items.length}개 항목 · 총 {totalMinutes}분
+          {items.length}개 항목
         </span>
       </div>
 
@@ -161,7 +160,7 @@ export default function ExercisesPage({
             <div className="manage-row" key={x.id}>
               <span className="order">{i + 1}</span>
               <span className="name">{x.name}</span>
-              <small>{x.minutes}분</small>
+              <small>{x.reps}회</small>
               <div className="row-tools">
                 <button className="icon-btn" title="위로" disabled={i === 0} onClick={() => move(i, -1)}>
                   <ArrowUp size={15} />

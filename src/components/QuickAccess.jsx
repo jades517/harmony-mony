@@ -21,7 +21,7 @@ export default function QuickAccess({ setTab }) {
         <button className="tile peach" onClick={() => setTab('훈련')}>
           <ClipboardList />
           <b>훈련표 보기</b>
-          <span>90분 기본기 프로그램</span>
+          <span>기본기 훈련 프로그램</span>
           <ArrowRight className="arrow" />
         </button>
         <button className="tile ice" onClick={() => setTab('기록')}>

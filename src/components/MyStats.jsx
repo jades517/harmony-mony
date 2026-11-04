@@ -1,5 +1,4 @@
-import { CalendarCheck, Flame, Footprints, Percent, Timer, Trophy } from 'lucide-react';
-import { formatMinutes } from '../lib/stats';
+import { CalendarCheck, Flame, Footprints, Percent, Repeat, Trophy } from 'lucide-react';
 
 export default function MyStats({ stats }) {
   const items = [
@@ -7,7 +6,7 @@ export default function MyStats({ stats }) {
     { icon: Percent, value: stats.attendanceRate === null ? '-' : `${stats.attendanceRate}%`, label: '참석률 (가입 이후)' },
     { icon: Flame, value: `${stats.streak}일`, label: '연속 훈련' },
     { icon: CalendarCheck, value: `${stats.monthCount}회`, label: '이번 달 훈련' },
-    { icon: Timer, value: formatMinutes(stats.monthSeconds), label: '이번 달 훈련 시간' },
+    { icon: Repeat, value: `${stats.monthReps.toLocaleString()}회`, label: '이번 달 누적 횟수' },
     { icon: Trophy, value: `${stats.totalCount}회`, label: '누적 훈련 기록' },
   ];
 

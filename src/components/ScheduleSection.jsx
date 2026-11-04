@@ -95,7 +95,7 @@ export default function ScheduleSection({
                 <small>
                   <ClipboardList size={14} />
                   {program.length > 0
-                    ? `훈련 ${program.length}개 · ${program.reduce((sum, x) => sum + x.minutes, 0)}분`
+                    ? `훈련 ${program.length}개`
                     : '훈련 미정'}
                 </small>
                 {me.isAdmin && (
