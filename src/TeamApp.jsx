@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import Header from './components/Header';
 import Hero from './components/Hero';
@@ -19,10 +19,21 @@ export default function TeamApp({ auth }) {
   const [tab, setTabState] = useState('홈');
   const [checked, setChecked] = useState([]);
 
+  // 화면을 떠나기 전 확인 (훈련 짜기에서 저장 안 한 변경이 있을 때). false를 돌려주면 이동 취소
+  const leaveGuard = useRef(null);
+  const canLeave = () => !leaveGuard.current || leaveGuard.current();
+  const tabRef = useRef(tab);
+  tabRef.current = tab;
+
   // 탭 이동을 브라우저 기록에 남겨서 휴대폰 뒤로가기로 이전 화면에 돌아감
   useEffect(() => {
     window.history.replaceState({ tab: '홈' }, '');
     const onPop = (e) => {
+      // 뒤로가기는 이미 기록이 바뀐 뒤라, 취소하면 현재 화면을 다시 기록에 넣음
+      if (!canLeave()) {
+        window.history.pushState({ tab: tabRef.current }, '');
+        return;
+      }
       setTabState(e.state?.tab ?? '홈');
       window.scrollTo({ top: 0 });
     };
@@ -31,7 +42,7 @@ export default function TeamApp({ auth }) {
   }, []);
 
   const setTab = (next) => {
-    if (next === tab) return;
+    if (next === tab || !canLeave()) return;
     window.history.pushState({ tab: next }, '');
     setTabState(next);
   };
@@ -100,6 +111,9 @@ export default function TeamApp({ auth }) {
   const shared = {
     setTab,
     goBack,
+    setLeaveGuard: (fn) => {
+      leaveGuard.current = fn;
+    },
     me,
     schedules,
     upcoming,

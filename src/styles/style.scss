@@ -290,6 +290,310 @@ button {
 .schedule-info small {
   margin: 0;
 }
+// ── 일정 상세 (모달) ──
+.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.clickable:hover {
+  border-color: $mint;
+  box-shadow: 0 6px 20px #1e292612;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: #1e292655;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 20px 50px #1e292633;
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+.schedule-detail h3 {
+  margin: 6px 0 12px;
+  font-size: 21px;
+}
+.schedule-detail > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #4b5d57;
+}
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 10px;
+  font-size: 14px;
+  color: $green;
+}
+.detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  counter-reset: item;
+}
+.detail-list li {
+  counter-increment: item;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e4eef2;
+  border-radius: 11px;
+  font-size: 13px;
+}
+.detail-list li::before {
+  content: counter(item);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #dcf1f9;
+  color: #3f7f99;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+.detail-list .exercise-text {
+  flex: 1;
+}
+.detail-list small {
+  flex-shrink: 0;
+  color: #8b9792;
+}
+.vote-summary {
+  display: grid;
+  gap: 6px;
+}
+.vote-summary > div {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #f6f8f7;
+  font-size: 13px;
+}
+.vote-summary .s-참석 {
+  background: #edf8f2;
+}
+.vote-summary-head {
+  flex-shrink: 0;
+  width: 72px;
+  font-weight: 700;
+  color: #4b5d57;
+}
+.vote-summary .s-참석 .vote-summary-head {
+  color: $green;
+}
+.vote-summary-names {
+  color: #4b5d57;
+  line-height: 1.5;
+}
+.detail-start {
+  width: 100%;
+  margin-top: 18px;
+}
+@media (max-width: 700px) {
+  // 모바일은 아래에서 올라오는 시트 형태
+  .modal-backdrop {
+    place-items: end center;
+    padding: 0;
+  }
+  .modal {
+    border-radius: 20px 20px 0 0;
+    padding: 22px 16px calc(22px + env(safe-area-inset-bottom));
+  }
+}
+
+// ── 홈 간단 일정 카드 ──
+.schedule-card {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  background: white;
+  border: 1px solid #ecefec;
+  border-radius: 24px;
+  padding: 20px 22px 20px 30px;
+  box-shadow: 0 4px 16px #1e29260a;
+}
+.schedule-card .date {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 98px;
+  height: 92px;
+  padding: 0;
+  border-radius: 16px;
+  background: #e6f5ed;
+  color: $green;
+}
+.schedule-card .date b {
+  font-size: 23px;
+}
+.schedule-card .date span {
+  font-size: 14px;
+  margin-top: 6px;
+}
+.schedule-card-info {
+  flex: 1;
+  min-width: 0;
+}
+.schedule-card-info h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.schedule-card-info p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+  font-size: 15px;
+  color: #4b5d57;
+}
+.schedule-card-info svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+// 홈 카드 참석자 이름
+.attendees {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 15px;
+  color: #4b5d57;
+}
+.attendees b {
+  color: #4b5d57;
+  margin: 0 4px 0 2px;
+}
+.attendees .none {
+  color: #8b9792;
+  margin-left: 2px;
+}
+.attendees .name-chip {
+  padding: 5px 13px;
+  border-radius: 20px;
+  background: #f1f2f1;
+  color: #2f3a37;
+  font-size: 14px;
+  font-weight: 600;
+}
+.attendees .more {
+  font-size: 13px;
+  color: #8b9792;
+}
+.vote-pill {
+  flex-shrink: 0;
+  padding: 10px 18px;
+  border-radius: 22px;
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+// 투표 전: 결과 배지와 같은 크기의 가벼운 점선 버튼
+.vote-pill.empty {
+  background: white;
+  border: 1px dashed #b9d3c9;
+  color: $green;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+.vote-pill.empty:hover {
+  background: #f1f8f5;
+  border-style: solid;
+  border-color: $green;
+}
+.vote-pill.s-참석,
+.vote-options .s-참석.selected {
+  background: #d8f3e6;
+  color: $green;
+}
+.vote-pill.s-불참,
+.vote-options .s-불참.selected {
+  background: #fde8ec;
+  color: #9a3550;
+}
+.vote-pill.s-미정,
+.vote-options .s-미정.selected {
+  background: #edf0ef;
+  color: #5d6e68;
+}
+.vote-options {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.vote-options button {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid #dfe6e2;
+  background: white;
+  color: #54746b;
+  font-size: 13px;
+  font-weight: 700;
+}
+.vote-options button.selected {
+  border-color: transparent;
+}
+@media (max-width: 700px) {
+  .schedule-card {
+    gap: 14px;
+    padding: 16px 14px;
+    border-radius: 20px;
+  }
+  .schedule-card .date {
+    width: 72px;
+    height: 72px;
+  }
+  .schedule-card .date b {
+    font-size: 18px;
+  }
+  .schedule-card .date span {
+    font-size: 12px;
+    margin-top: 3px;
+  }
+  .schedule-card-info h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+  .schedule-card-info p,
+  .attendees {
+    font-size: 13px;
+  }
+  .attendees .name-chip {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  .vote-pill {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+}
 .rsvp {
   text-align: right;
 }
@@ -799,6 +1103,51 @@ input {
 }
 .exercise-list .exercise-row small {
   flex-shrink: 0;
+}
+// 훈련 짜기: 변경 사항을 한 번에 저장하는 하단 바 (오른쪽은 플로팅 버튼 자리)
+.save-bar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 84px 0 0;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #e4eef2;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px #1e292614;
+}
+.save-bar span {
+  flex: 1;
+  font-size: 13px;
+  color: #8b9792;
+}
+.save-bar.dirty {
+  border-color: $ice;
+}
+.save-bar.dirty span {
+  color: #3f7f99;
+  font-weight: 700;
+}
+.save-bar button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.save-bar .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+@media (max-width: 700px) {
+  .save-bar {
+    margin-right: 72px;
+    flex-wrap: wrap;
+  }
+  .save-bar span {
+    flex-basis: 100%;
+  }
 }
 .manage-list {
   display: grid;

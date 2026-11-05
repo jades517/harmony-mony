@@ -6,8 +6,8 @@ import ActivitySection from '../components/ActivitySection';
 export default function HomePage(props) {
   return (
     <>
+      <ScheduleSection {...props} items={props.upcoming} limit={3} compact />
       <QuickAccess {...props} />
-      <ScheduleSection {...props} items={props.upcoming} limit={2} />
       <TrainingSection {...props} />
       <ActivitySection {...props} />
     </>

@@ -1,14 +1,19 @@
 import { useState } from 'react';
 import { ArrowRight, ClipboardList, Clock3, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import ScheduleForm from './ScheduleForm';
-import { RSVP_OPTIONS } from '../lib/constants';
+import ScheduleDetail from './ScheduleDetail';
+import { RSVP_LABELS, RSVP_OPTIONS } from '../lib/constants';
 import { formatDate, formatTimeRange, weekday } from '../lib/format';
+
+// 홈 카드에 이름을 보여줄 최대 인원 (나머지는 +N, 전체는 상세 창에서)
+const MAX_NAMES = 6;
 
 export default function ScheduleSection({
   eyebrow = 'UPCOMING SCHEDULE',
   title = '다가오는 일정',
   items,
   limit,
+  compact = false,
   canAdd = false,
   isPast = false,
   setTab,
@@ -17,9 +22,20 @@ export default function ScheduleSection({
   attendances,
   programFor,
   openProgramEditor,
+  setTrainingSource,
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [votingId, setVotingId] = useState(null);
+  const [detailId, setDetailId] = useState(null);
+  const detail = detailId && schedules.rows.find((s) => s.id === detailId);
+
+  const startTraining = (id) => {
+    setDetailId(null);
+    setTrainingSource({ kind: 'schedule', id });
+    setTab('훈련');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const shown = limit ? items.slice(0, limit) : items;
 
   const setRsvp = (scheduleId, status) =>
@@ -74,8 +90,71 @@ export default function ScheduleSection({
           const going = rows.filter((a) => a.status === '참석').map((a) => a.member_name);
           const mine = rows.find((a) => a.user_id === me.id)?.status;
           const program = programFor({ kind: 'schedule', id: s.id });
+          // 홈: 날짜·제목·장소·시간과 내 투표 결과만 보여주는 간단한 카드
+          if (compact) {
+            const voting = votingId === s.id;
+            return (
+              <article className="schedule-card clickable" key={s.id} onClick={() => setDetailId(s.id)}>
+                <div className="date">
+                  <b>{formatDate(s.date)}</b>
+                  <span>{weekday(s.date)}요일</span>
+                </div>
+                <div className="schedule-card-info">
+                  <h3>{s.title}</h3>
+                  <p>
+                    <MapPin size={16} /> {s.place || '장소 미정'}
+                  </p>
+                  <p>
+                    <Clock3 size={16} /> {formatTimeRange(s.start_time, s.end_time)}
+                  </p>
+                  <div className="attendees">
+                    <Users size={16} />
+                    {going.length === 0 ? (
+                      <span className="none">아직 참석자가 없어요</span>
+                    ) : (
+                      <>
+                        <b>{going.length}명</b>
+                        {going.slice(0, MAX_NAMES).map((name, i) => (
+                          <span className="name-chip" key={`${name}-${i}`}>
+                            {name}
+                          </span>
+                        ))}
+                        {going.length > MAX_NAMES && <span className="more">+{going.length - MAX_NAMES}</span>}
+                      </>
+                    )}
+                  </div>
+                  {voting && (
+                    <div className="vote-options" onClick={(e) => e.stopPropagation()}>
+                      {RSVP_OPTIONS.map((v) => (
+                        <button
+                          key={v}
+                          className={`s-${v}${mine === v ? ' selected' : ''}`}
+                          onClick={async () => {
+                            await setRsvp(s.id, v);
+                            setVotingId(null);
+                          }}
+                        >
+                          {RSVP_LABELS[v]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  className={`vote-pill ${mine ? `s-${mine}` : 'empty'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVotingId(voting ? null : s.id);
+                  }}
+                  title={mine ? '눌러서 투표 변경' : undefined}
+                >
+                  {voting ? '닫기' : mine ? RSVP_LABELS[mine] : '투표하기'}
+                </button>
+              </article>
+            );
+          }
           return (
-            <article className={`schedule${isPast ? ' past' : ''}`} key={s.id}>
+            <article className={`schedule clickable${isPast ? ' past' : ''}`} key={s.id} onClick={() => setDetailId(s.id)}>
               <div className="date">
                 <b>{formatDate(s.date)}</b>
                 <span>{weekday(s.date)}요일</span>
@@ -99,7 +178,7 @@ export default function ScheduleSection({
                     : '훈련 미정'}
                 </small>
                 {me.isAdmin && (
-                  <div className="row-actions">
+                  <div className="row-actions" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => openProgramEditor({ kind: 'schedule', id: s.id })}>
                       <ClipboardList size={13} /> 훈련 짜기
                     </button>
@@ -112,7 +191,7 @@ export default function ScheduleSection({
                   </div>
                 )}
               </div>
-              <div className="rsvp">
+              <div className="rsvp" onClick={(e) => e.stopPropagation()}>
                 <span>내 참석 여부</span>
                 <div>
                   {RSVP_OPTIONS.map((v) => (
@@ -126,6 +205,15 @@ export default function ScheduleSection({
           );
         })}
       </div>
+      {detail && (
+        <ScheduleDetail
+          schedule={detail}
+          items={programFor({ kind: 'schedule', id: detail.id })}
+          votes={attendances.rows.filter((a) => a.schedule_id === detail.id)}
+          onClose={() => setDetailId(null)}
+          onStart={() => startTraining(detail.id)}
+        />
+      )}
     </section>
   );
 }

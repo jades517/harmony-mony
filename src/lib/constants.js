@@ -7,3 +7,5 @@ export const NAV_LABELS = { 기록: '마이 보드', 회원: '회원 관리' };
 export const navItems = (isAdmin) => (isAdmin ? [...NAV, '회원'] : NAV);
 
 export const RSVP_OPTIONS = ['참석', '불참', '미정'];
+// 홈 일정 카드에 보여줄 투표 결과 이름
+export const RSVP_LABELS = { 참석: '참석예정', 불참: '미참석', 미정: '미정' };

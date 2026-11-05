@@ -242,20 +242,20 @@ button {
 
 .peach {
   background: #a8ddf0;
-  color: #653c4a;
+  color: #244c60;
 }
 
 .peach span {
-  color: #704956;
+  color: #426b7d;
 }
 
 .ice {
   background: #f5a7b8;
-  color: #244c60;
+  color: #653c4a;
 }
 
 .ice span {
-  color: #426b7d;
+  color: #704956;
 }
 
 .section {
@@ -328,6 +328,336 @@ button {
   margin: 0;
 }
 
+.clickable {
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.clickable:hover {
+  border-color: #bfe8d8;
+  box-shadow: 0 6px 20px rgba(30, 41, 38, 0.0705882353);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(30, 41, 38, 0.3333333333);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.modal {
+  position: relative;
+  width: min(560px, 100%);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 26px;
+  box-shadow: 0 20px 50px rgba(30, 41, 38, 0.2);
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.schedule-detail h3 {
+  margin: 6px 0 12px;
+  font-size: 21px;
+}
+
+.schedule-detail > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #4b5d57;
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 22px 0 10px;
+  font-size: 14px;
+  color: #108668;
+}
+
+.detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  counter-reset: item;
+}
+
+.detail-list li {
+  counter-increment: item;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e4eef2;
+  border-radius: 11px;
+  font-size: 13px;
+}
+
+.detail-list li::before {
+  content: counter(item);
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #dcf1f9;
+  color: #3f7f99;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+
+.detail-list .exercise-text {
+  flex: 1;
+}
+
+.detail-list small {
+  flex-shrink: 0;
+  color: #8b9792;
+}
+
+.vote-summary {
+  display: grid;
+  gap: 6px;
+}
+
+.vote-summary > div {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 11px;
+  background: #f6f8f7;
+  font-size: 13px;
+}
+
+.vote-summary .s-참석 {
+  background: #edf8f2;
+}
+
+.vote-summary-head {
+  flex-shrink: 0;
+  width: 72px;
+  font-weight: 700;
+  color: #4b5d57;
+}
+
+.vote-summary .s-참석 .vote-summary-head {
+  color: #108668;
+}
+
+.vote-summary-names {
+  color: #4b5d57;
+  line-height: 1.5;
+}
+
+.detail-start {
+  width: 100%;
+  margin-top: 18px;
+}
+
+@media (max-width: 700px) {
+  .modal-backdrop {
+    place-items: end center;
+    padding: 0;
+  }
+  .modal {
+    border-radius: 20px 20px 0 0;
+    padding: 22px 16px calc(22px + env(safe-area-inset-bottom));
+  }
+}
+.schedule-card {
+  display: flex;
+  align-items: stretch;
+  background: white;
+  border: 1px solid #e9eee9;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(30, 41, 38, 0.0392156863);
+}
+
+.schedule-card .date {
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 96px;
+  background-color: #fff;
+  color: #1e2926;
+}
+
+.schedule-card .date .date-wrap {
+  background-color: #e6f5ed;
+  padding: 8px 0;
+  border-radius: 20px;
+  color: #108668;
+}
+
+.schedule-card .date b {
+  font-size: 22px;
+}
+
+.schedule-card .date span {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.schedule-card-info {
+  flex: 1;
+  min-width: 0;
+  padding: 18px 20px;
+}
+
+.schedule-card-info h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+
+.schedule-card-info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: #4b5d57;
+}
+
+.schedule-card-info p svg {
+  color: #5d6b7a;
+  flex-shrink: 0;
+}
+
+.attendees {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #4b5d57;
+}
+
+.attendees svg {
+  color: #5d6b7a;
+  margin-right: 3px;
+  flex-shrink: 0;
+}
+
+.attendees b {
+  margin-right: 3px;
+}
+
+.attendees .none {
+  color: #8b9792;
+}
+
+.attendees .name-chip {
+  padding: 3px 9px;
+  border-radius: 20px;
+  background: rgba(30, 41, 38, 0.0392156863);
+  color: #424242;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.attendees .more {
+  font-size: 12px;
+  color: #8b9792;
+}
+
+.vote-pill {
+  align-self: center;
+  margin: 0 18px 0 0;
+  padding: 7px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.vote-pill.empty {
+  background: white;
+  border: 1px dashed #b9d3c9;
+  color: #108668;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.vote-pill.empty:hover {
+  background: #f1f8f5;
+  border-style: solid;
+  border-color: #108668;
+}
+
+.vote-pill.s-참석,
+.vote-options .s-참석.selected {
+  background: #d8f3e6;
+  color: #108668;
+}
+
+.vote-pill.s-불참,
+.vote-options .s-불참.selected {
+  background: #fde8ec;
+  color: #9a3550;
+}
+
+.vote-pill.s-미정,
+.vote-options .s-미정.selected {
+  background: #edf0ef;
+  color: #5d6e68;
+}
+
+.vote-options {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.vote-options button {
+  flex: 1;
+  padding: 9px 0;
+  border-radius: 10px;
+  border: 1px solid #dfe6e2;
+  background: white;
+  color: #54746b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.vote-options button.selected {
+  border-color: transparent;
+}
+
+@media (max-width: 700px) {
+  .schedule-card .date {
+    min-width: 76px;
+  }
+  .schedule-card .date b {
+    font-size: 18px;
+  }
+  .schedule-card-info {
+    padding: 16px 14px;
+  }
+  .vote-pill {
+    margin: 0 12px 0 0;
+  }
+}
 .rsvp {
   text-align: right;
 }
@@ -856,6 +1186,101 @@ input {
   color: #8b9792;
 }
 
+.exercise-form {
+  flex-wrap: wrap;
+}
+
+.exercise-form .exercise-desc {
+  order: 1;
+  flex-basis: 100%;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid #dfe6e2;
+  border-radius: 9px;
+  padding: 9px 11px;
+  resize: vertical;
+}
+
+.exercise-form button {
+  order: 2;
+}
+
+.exercise-form .exercise-desc:focus {
+  outline: 2px solid #bfe8d8;
+  border-color: #108668;
+}
+
+.exercise-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.exercise-text span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #7b8a84;
+}
+
+.exercise-list .exercise-row {
+  align-items: flex-start;
+}
+
+.exercise-list .exercise-row small {
+  flex-shrink: 0;
+}
+
+.save-bar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 84px 0 0;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #e4eef2;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(30, 41, 38, 0.0784313725);
+}
+
+.save-bar span {
+  flex: 1;
+  font-size: 13px;
+  color: #8b9792;
+}
+
+.save-bar.dirty {
+  border-color: #a8ddf0;
+}
+
+.save-bar.dirty span {
+  color: #3f7f99;
+  font-weight: 700;
+}
+
+.save-bar button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.save-bar .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 700px) {
+  .save-bar {
+    margin-right: 72px;
+    flex-wrap: wrap;
+  }
+  .save-bar span {
+    flex-basis: 100%;
+  }
+}
 .manage-list {
   display: grid;
   gap: 8px;
@@ -950,32 +1375,64 @@ input {
   font-size: 13px;
 }
 
-.schedule-picker {
+.program-picker {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.program-group {
+  --tone: #108668;
+  --tone-soft: #eef8f3;
+  background: var(--tone-soft);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.program-group.mine {
+  --tone: #3d86a6;
+  --tone-soft: #f1f9fc;
+}
+
+.program-group-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f1f9fc;
-  color: #3f7f99;
-  border-radius: 11px;
-  padding: 4px 12px;
-  margin-bottom: 16px;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--tone);
+  margin-bottom: 10px;
 }
 
-.schedule-picker select {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: transparent;
-  font: inherit;
+.program-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.program-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  color: #1e2926;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  padding: 8px 14px;
   font-size: 14px;
   font-weight: 700;
-  color: #1e2926;
-  padding: 8px 0;
-  cursor: pointer;
+  text-align: left;
 }
 
-.schedule-picker select:focus {
-  outline: none;
+.program-chip.active {
+  background: var(--tone);
+  color: white;
+}
+
+.program-chip.add {
+  background: transparent;
+  border: 1.5px dashed var(--tone);
+  color: var(--tone);
 }
 
 .schedule-info small + small {
@@ -1299,11 +1756,6 @@ input {
 }
 .save-log {
   margin-top: 16px;
-}
-
-.schedule-picker optgroup {
-  font-weight: 800;
-  color: #7b8a84;
 }
 
 .log-schedule.private {

@@ -37,6 +37,7 @@ export default function useTable(table, { order = 'created_at', ascending = true
   };
 
   return {
+    name: table,
     rows,
     loading,
     error,

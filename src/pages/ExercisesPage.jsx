@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowUp, CopyPlus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowDown, ArrowLeft, ArrowUp, CopyPlus, Pencil, Plus, Save, Trash2 } from 'lucide-react';
 import { formatDate, weekday } from '../lib/format';
 import { sourceLink, sourceTable } from '../lib/programs';
+import { supabase } from '../lib/supabase';
 
 function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name ?? '');
@@ -55,6 +56,7 @@ function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
 export default function ExercisesPage({
   me,
   goBack,
+  setLeaveGuard,
   editTarget,
   schedules,
   exercises,
@@ -65,23 +67,83 @@ export default function ExercisesPage({
   setTrainingSource,
 }) {
   const [editingId, setEditingId] = useState(null);
+  // 편집 중인 목록. null이면 변경 없음(DB 내용 그대로). '저장'을 눌러야 DB에 반영
+  const [draft, setDraft] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const { source } = editTarget;
   const schedule = source.kind === 'schedule' && schedules.rows.find((s) => s.id === source.id);
   const program = source.kind === 'personal' && personalPrograms.rows.find((p) => p.id === source.id);
   const table = sourceTable(source, { exercises, scheduleExercises, personalExercises });
-  const items = programFor(source);
+  const saved = programFor(source);
+  const items = draft ?? saved;
+  const dirty = draft !== null;
   const link = { ...sourceLink(source), ...(source.kind === 'personal' && { user_id: me.id }) };
 
+  const change = (fn) => setDraft(fn(items));
+  const newItem = (values) => ({ id: `new-${crypto.randomUUID()}`, isNew: true, ...values });
+
+  // 저장하지 않은 변경이 있으면 돌아가기·메뉴 이동·뒤로가기 전에 확인, 페이지를 닫으면 브라우저가 경고
+  useEffect(() => {
+    if (!dirty) return;
+    setLeaveGuard(() => confirm('저장하지 않은 변경 사항이 있어요. 저장하지 않고 나갈까요?'));
+    const onUnload = (e) => e.preventDefault();
+    window.addEventListener('beforeunload', onUnload);
+    return () => {
+      setLeaveGuard(null);
+      window.removeEventListener('beforeunload', onUnload);
+    };
+  }, [dirty]);
+
   const add = (values) => {
-    const position = Math.max(0, ...items.map((x) => x.position)) + 1;
-    return table.insert({ ...values, position, ...link });
+    change((list) => [...list, newItem(values)]);
+    return true;
   };
 
-  const copyDefault = () => {
-    const start = Math.max(0, ...items.map((x) => x.position));
-    return table.insert(
-      exercises.rows.map((x, i) => ({ ...link, name: x.name, description: x.description, reps: x.reps, position: start + i + 1 })),
-    );
+  const copyDefault = () =>
+    change((list) => [
+      ...list,
+      ...exercises.rows.map((x) => newItem({ name: x.name, description: x.description, reps: x.reps })),
+    ]);
+
+  const cancel = () => {
+    if (!confirm('변경 사항을 모두 취소할까요?')) return;
+    setDraft(null);
+    setEditingId(null);
+    setSaveError('');
+  };
+
+  // 초안과 DB 내용을 비교해 삭제·수정·추가를 한 번에 반영
+  const save = async () => {
+    setSaving(true);
+    setSaveError('');
+    const q = () => supabase.from(table.name);
+    const keep = new Set(items.map((x) => x.id));
+    const removed = saved.filter((x) => !keep.has(x.id));
+    const fields = (x, i) => ({ name: x.name, description: x.description ?? null, reps: x.reps ?? null, position: i + 1 });
+    const updates = items
+      .map((x, i) => ({ x, values: fields(x, i) }))
+      .filter(({ x, values }) => {
+        if (x.isNew) return false;
+        const before = saved.find((s) => s.id === x.id);
+        return Object.keys(values).some((k) => (before[k] ?? null) !== values[k]);
+      });
+    const inserts = items.map((x, i) => x.isNew && { ...link, ...fields(x, i) }).filter(Boolean);
+
+    const results = await Promise.all([
+      removed.length > 0 && q().delete().in('id', removed.map((x) => x.id)),
+      ...updates.map(({ x, values }) => q().update(values).eq('id', x.id)),
+      inserts.length > 0 && q().insert(inserts),
+    ]);
+    const error = results.find((r) => r?.error)?.error;
+    await table.reload();
+    setSaving(false);
+    if (error) {
+      setSaveError(`저장 중 오류가 났어요 · ${error.message}`);
+      return;
+    }
+    setDraft(null);
+    setEditingId(null);
   };
 
   const renameProgram = () => {
@@ -94,6 +156,8 @@ export default function ExercisesPage({
     if (await personalPrograms.remove(program.id)) {
       await personalExercises.reload();
       setTrainingSource(null);
+      // 루틴이 없어졌으니 저장 안 한 변경도 묻지 않고 나감
+      setLeaveGuard(null);
       goBack();
     }
   };
@@ -108,14 +172,13 @@ export default function ExercisesPage({
     personal: { eyebrow: 'MY ROUTINE', title: program?.title ?? '내 훈련', sub: '🔒 나만 볼 수 있는 루틴이에요.' },
   }[source.kind];
 
-  // 바뀐 순서대로 position을 1부터 다시 매김 (값이 겹쳐 있어도 정리됨)
-  const move = async (index, dir) => {
-    const next = [...items];
-    [next[index], next[index + dir]] = [next[index + dir], next[index]];
-    for (const [i, x] of next.entries()) {
-      if (x.position !== i + 1) await table.update(x.id, { position: i + 1 });
-    }
-  };
+  // 순서는 목록 순서 그대로 저장 시 position 1부터 다시 매김
+  const move = (index, dir) =>
+    change((list) => {
+      const next = [...list];
+      [next[index], next[index + dir]] = [next[index + dir], next[index]];
+      return next;
+    });
 
   return (
     <section className="section">
@@ -161,11 +224,11 @@ export default function ExercisesPage({
             <div className="manage-row editing" key={x.id}>
               <ExerciseForm
                 initial={x}
-                submitLabel="저장"
-                onSubmit={async (values) => {
-                  const ok = await table.update(x.id, values);
-                  if (ok) setEditingId(null);
-                  return ok;
+                submitLabel="적용"
+                onSubmit={(values) => {
+                  change((list) => list.map((y) => (y.id === x.id ? { ...y, ...values } : y)));
+                  setEditingId(null);
+                  return true;
                 }}
                 onCancel={() => setEditingId(null)}
               />
@@ -191,7 +254,7 @@ export default function ExercisesPage({
                 <button
                   className="icon-btn danger"
                   title="삭제"
-                  onClick={() => confirm(`'${x.name}' 항목을 삭제할까요?`) && table.remove(x.id)}
+                  onClick={() => change((list) => list.filter((y) => y.id !== x.id))}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -199,6 +262,16 @@ export default function ExercisesPage({
             </div>
           ),
         )}
+      </div>
+
+      <div className={`save-bar${dirty ? ' dirty' : ''}`}>
+        <span>{saveError || (dirty ? '저장하지 않은 변경 사항이 있어요.' : '변경 사항이 없어요.')}</span>
+        <button className="outline" onClick={cancel} disabled={!dirty || saving}>
+          변경 취소
+        </button>
+        <button className="primary" onClick={save} disabled={!dirty || saving}>
+          <Save size={15} /> {saving ? '저장 중…' : '저장'}
+        </button>
       </div>
     </section>
   );
