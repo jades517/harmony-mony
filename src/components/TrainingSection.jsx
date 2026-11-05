@@ -63,7 +63,7 @@ export default function TrainingSection({
       completed: done.length,
       total: items.length,
       // 체크한 항목의 횟수 합계
-      total_reps: done.reduce((sum, x) => sum + x.reps, 0),
+      total_reps: done.reduce((sum, x) => sum + (x.reps ?? 0), 0),
       exercise_names: done.map((x) => x.name),
     });
     if (ok) {
@@ -145,8 +145,11 @@ export default function TrainingSection({
           {items.map((x) => (
             <label className="exercise-row" key={x.id}>
               <input type="checkbox" checked={checked.includes(x.id)} onChange={() => toggleExercise(x.id)} />
-              <span>{x.name}</span>
-              <small>{x.reps}회</small>
+              <span className="exercise-text">
+                <b>{x.name}</b>
+                {x.description && <span>{x.description}</span>}
+              </span>
+              {x.reps && <small>{x.reps}회</small>}
             </label>
           ))}
         </div>

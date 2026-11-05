@@ -5,26 +5,40 @@ import { sourceLink, sourceTable } from '../lib/programs';
 
 function ExerciseForm({ initial, submitLabel, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name ?? '');
-  const [reps, setReps] = useState(initial?.reps ?? 10);
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [reps, setReps] = useState(initial?.reps ?? '');
   const [saving, setSaving] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    const ok = await onSubmit({ name: name.trim(), reps: Number(reps) });
+    // 횟수·설명은 비워 두면 표시하지 않음
+    const ok = await onSubmit({
+      name: name.trim(),
+      description: description.trim() || null,
+      reps: reps === '' ? null : Number(reps),
+    });
     setSaving(false);
     if (ok && !initial) {
       setName('');
-      setReps(10);
+      setDescription('');
+      setReps('');
     }
   };
 
   return (
     <form className="inline-form exercise-form" onSubmit={submit}>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="훈련 이름 (예: 1:1 수비 연습)" required autoFocus={Boolean(initial)} />
-      <input type="number" min="1" value={reps} onChange={(e) => setReps(e.target.value)} required />
+      <input type="number" min="1" value={reps} onChange={(e) => setReps(e.target.value)} placeholder="횟수" />
       <span>회</span>
+      <textarea
+        className="exercise-desc"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="부가설명 (선택) · 자세, 거리, 주의할 점 등"
+        rows={2}
+      />
       {onCancel && (
         <button type="button" className="outline" onClick={onCancel}>
           취소
@@ -66,7 +80,7 @@ export default function ExercisesPage({
   const copyDefault = () => {
     const start = Math.max(0, ...items.map((x) => x.position));
     return table.insert(
-      exercises.rows.map((x, i) => ({ ...link, name: x.name, reps: x.reps, position: start + i + 1 })),
+      exercises.rows.map((x, i) => ({ ...link, name: x.name, description: x.description, reps: x.reps, position: start + i + 1 })),
     );
   };
 
@@ -159,8 +173,11 @@ export default function ExercisesPage({
           ) : (
             <div className="manage-row" key={x.id}>
               <span className="order">{i + 1}</span>
-              <span className="name">{x.name}</span>
-              <small>{x.reps}회</small>
+              <span className="name exercise-text">
+                <b>{x.name}</b>
+                {x.description && <span>{x.description}</span>}
+              </span>
+              {x.reps && <small>{x.reps}회</small>}
               <div className="row-tools">
                 <button className="icon-btn" title="위로" disabled={i === 0} onClick={() => move(i, -1)}>
                   <ArrowUp size={15} />
