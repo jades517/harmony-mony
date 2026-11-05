@@ -2,7 +2,7 @@ $green: #108668;
 $mint: #bfe8d8;
 $ice: #a8ddf0;
 $pink: #f5a7b8;
-$bg: #f8f7f2;
+$bg: #ffffff;
 $ink: #1e2926;
 * {
   box-sizing: border-box;
@@ -180,56 +180,62 @@ button {
 .eyebrow.dark {
   color: $green;
 }
+// 홈 바로가기 (3열, 아이콘 + 이름)
 .quick {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 17px;
-}
-.tile {
-  text-align: left;
-  position: relative;
-  min-height: 156px;
-  padding: 24px;
-  border-radius: 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-  gap: 9px;
-  color: #164e41;
-}
-.tile svg {
-  width: 27px;
-  height: 27px;
-}
-.tile b {
-  font-size: 19px;
-}
-.tile span {
-  font-size: 12px;
-  color: #4b6d66;
-}
-.tile .arrow {
-  position: absolute;
-  right: 23px;
-  bottom: 23px;
-  width: 18px;
-}
-.mint {
-  background: $mint;
-}
-.peach {
-  background: $ice;
-  color: #244c60;
-}
-.peach span {
-  color: #426b7d;
-}
-.ice {
-  background: $pink;
-  color: #653c4a;
-}
-.ice span {
-  color: #704956;
+  gap: 12px;
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 8px;
+    border-radius: 16px;
+    color: #164e41;
+    transition: transform 0.15s;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+    b {
+      font-size: 14px;
+    }
+  }
+  .mint {
+    background: $mint;
+  }
+  .peach {
+    background: $ice;
+    color: #244c60;
+  }
+  .ice {
+    background: $pink;
+    color: #653c4a;
+  }
+
+  @media (max-width: 700px) {
+    gap: 8px;
+
+    .tile {
+      padding: 14px 6px;
+      gap: 6px;
+
+      svg {
+        width: 21px;
+        height: 21px;
+      }
+      b {
+        font-size: 13px;
+      }
+    }
+  }
 }
 .section {
   margin-top: 14px;
@@ -774,24 +780,6 @@ footer {
   }
   .section-title h2 {
     font-size: 21px;
-  }
-  .quick {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .tile {
-    min-height: 142px;
-    padding: 17px;
-  }
-  .tile b {
-    font-size: 16px;
-  }
-  .tile span {
-    font-size: 11px;
-  }
-  .quick .tile:last-child {
-    grid-column: span 2;
-    min-height: 110px;
   }
   .schedule {
     gap: 12px;
