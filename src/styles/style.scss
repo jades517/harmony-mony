@@ -1,9 +1,21 @@
+@use "sass:list";
+
 $green: #108668;
 $mint: #bfe8d8;
 $ice: #a8ddf0;
 $pink: #f5a7b8;
 $bg: #ffffff;
 $ink: #1e2926;
+$mobile: 700px;
+
+// 카드 공통: 흰 배경 + 옅은 테두리 + 옅은 그림자
+@mixin card {
+  background: white;
+  border: 1px solid #ecefec;
+  box-shadow: 0 4px 16px #1e29260a;
+}
+
+// ── 기본 ──
 * {
   box-sizing: border-box;
 }
@@ -24,10 +36,27 @@ button {
   cursor: pointer;
   border: 0;
 }
+input {
+  font: inherit;
+  color: $ink;
+}
 .container {
   width: min(1100px, calc(100% - 40px));
   margin: auto;
+
+  @media (max-width: $mobile) {
+    width: min(100% - 28px, 500px);
+  }
 }
+footer {
+  text-align: center;
+  padding: 60px 0 90px;
+  font-size: 11px;
+  color: #a2aea8;
+  letter-spacing: 1px;
+}
+
+// ── 헤더 ──
 .header {
   background: white;
   border-bottom: 1px solid #e8eae6;
@@ -40,6 +69,35 @@ button {
   display: flex;
   align-items: center;
   gap: 30px;
+
+  // PC 상단 메뉴
+  nav {
+    display: flex;
+    margin-left: auto;
+    gap: 8px;
+
+    button {
+      background: transparent;
+      padding: 12px 18px;
+      border-radius: 10px;
+      color: #6b7772;
+
+      &.active {
+        background: #e4f5ed;
+        color: $green;
+        font-weight: 800;
+      }
+    }
+  }
+
+  @media (max-width: $mobile) {
+    height: 64px;
+
+    // 모바일은 플로팅 메뉴만 사용
+    nav {
+      display: none;
+    }
+  }
 }
 .brand {
   display: flex;
@@ -52,37 +110,60 @@ button {
   background: transparent;
   padding: 0;
   text-align: left;
+
+  small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #6a8980;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 19px;
+  }
 }
 .brand-icon {
   background: $mint;
   border-radius: 14px;
   padding: 10px;
   font-size: 24px;
+
+  @media (max-width: $mobile) {
+    font-size: 19px;
+    padding: 8px;
+  }
 }
-.brand small {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: #6a8980;
-}
-.head nav {
+// 아바타 + 누르면 오른쪽으로 펼쳐지는 이름·권한 (알약 형태)
+.profile {
   display: flex;
+  align-items: center;
   margin-left: auto;
-  gap: 8px;
-}
-.head nav button {
-  background: transparent;
-  padding: 12px 18px;
-  border-radius: 10px;
-  color: #6b7772;
-}
-.head nav button.active {
-  background: #e4f5ed;
-  color: $green;
-  font-weight: 800;
+  border-radius: 999px;
+  transition: background 0.25s;
+
+  // 헤더 메뉴(PC) 다음에 올 때는 메뉴가 오른쪽으로 밀어줌
+  .head nav + & {
+    margin-left: 0;
+  }
+
+  &.open {
+    background: #eef8f3;
+
+    .profile-info {
+      max-width: 240px;
+      opacity: 1;
+      padding: 0 14px 0 10px;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    .head nav + & {
+      margin-left: auto;
+    }
+  }
 }
 .avatar {
-  margin-left: auto;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
   background: $green;
@@ -90,9 +171,48 @@ button {
   border-radius: 50%;
   width: 38px;
   height: 38px;
+  padding: 0;
   font-size: 12px;
   font-weight: 800;
+
+  @media (max-width: $mobile) {
+    width: 34px;
+    height: 34px;
+    font-size: 11px;
+  }
 }
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #4b5d57;
+  transition:
+    max-width 0.3s ease,
+    opacity 0.2s,
+    padding 0.3s ease;
+
+  b {
+    color: $green;
+  }
+  .logout {
+    margin-left: 8px;
+    padding: 6px;
+    border-radius: 50%;
+    color: #7b8a84;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 13px;
+  }
+}
+
+// ── 히어로 ──
 .hero {
   margin-top: 28px;
   border-radius: 25px;
@@ -104,23 +224,31 @@ button {
   justify-content: space-between;
   overflow: hidden;
   position: relative;
-}
-.eyebrow {
-  font-size: 11px;
-  letter-spacing: 2px;
-  font-weight: 800;
-  color: #b5eadd;
-}
-.hero h1 {
-  font-size: 39px;
-  line-height: 1.25;
-  margin: 16px 0;
-  letter-spacing: -2px;
-}
-.hero p {
-  color: #e0f5ee;
-  line-height: 1.7;
-  font-size: 14px;
+
+  h1 {
+    font-size: 39px;
+    line-height: 1.25;
+    margin: 16px 0;
+    letter-spacing: -2px;
+  }
+  p {
+    color: #e0f5ee;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+
+  @media (max-width: $mobile) {
+    margin-top: 16px;
+    min-height: 235px;
+    padding: 28px 24px;
+
+    h1 {
+      font-size: 30px;
+    }
+    p {
+      font-size: 12px;
+    }
+  }
 }
 .hero-btn {
   display: flex;
@@ -132,16 +260,38 @@ button {
   border-radius: 12px;
   font-weight: 800;
   margin-top: 20px;
+
+  @media (max-width: $mobile) {
+    position: relative;
+    z-index: 2;
+  }
 }
 .hero-art {
   width: 35%;
   display: grid;
   place-items: center;
   position: relative;
+
+  span {
+    font-size: 116px;
+    filter: drop-shadow(0 14px 12px #004f3c);
+    z-index: 1;
+  }
+
+  @media (max-width: $mobile) {
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    opacity: 1;
+
+    span {
+      font-size: 100px;
+    }
+  }
 }
-.hero-art span {
-  font-size: 116px;
-  filter: drop-shadow(0 14px 12px #004f3c);
+.hero-img {
+  width: 240px;
+  max-width: 100%;
   z-index: 1;
 }
 .orbit {
@@ -150,11 +300,24 @@ button {
   border-radius: 50%;
   width: 260px;
   height: 260px;
+
+  &.two {
+    width: 340px;
+    height: 340px;
+  }
 }
-.orbit.two {
-  width: 340px;
-  height: 340px;
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #b5eadd;
+
+  &.dark {
+    color: $green;
+  }
 }
+
+// ── 안내 메시지 ──
 .demo-note {
   font-size: 12px;
   color: #6c7973;
@@ -162,25 +325,176 @@ button {
   border-radius: 10px;
   padding: 11px 15px;
   margin-top: 18px;
+
+  &.warn {
+    background: #fff4e0;
+    color: #7a5a1d;
+  }
+  &.error {
+    background: #fde8ec;
+    color: #9a3550;
+  }
+  code {
+    font-size: 11px;
+    background: #ffffff99;
+    padding: 1px 5px;
+    border-radius: 5px;
+  }
+}
+
+// ── 섹션 공통 ──
+.section {
+  margin-top: 14px;
 }
 .section-title {
   display: flex;
   align-items: end;
   justify-content: space-between;
   margin: 36px 0 18px;
+
+  h2 {
+    font-size: 25px;
+    margin: 6px 0 0;
+    letter-spacing: -1px;
+
+    span {
+      color: $ice;
+    }
+  }
+  .sub {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: #7b8a84;
+  }
+
+  @media (max-width: $mobile) {
+    h2 {
+      font-size: 21px;
+    }
+  }
 }
-.section-title h2 {
-  font-size: 25px;
-  margin: 6px 0 0;
-  letter-spacing: -1px;
+.empty {
+  background: white;
+  border: 1px dashed #d9e2dd;
+  border-radius: 14px;
+  padding: 22px;
+  text-align: center;
+  font-size: 13px;
+  color: #86958f;
 }
-.section-title h2 span {
-  color: $ice;
+
+// ── 버튼 ──
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: $green;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-size: 13px;
+  font-weight: 800;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+  &.soft {
+    background: #dcf1f9;
+    color: #3f7f99;
+  }
 }
-.eyebrow.dark {
+// 연한 배경 버튼 (참석 여부, 취소 등)
+%soft-btn {
+  padding: 9px 12px;
+  background: #edf3f0;
+  border-radius: 9px;
+  color: #54746b;
+  font-size: 12px;
+}
+.outline {
+  @extend %soft-btn;
+}
+.text-btn {
+  background: transparent;
   color: $green;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+
+  &.inline {
+    display: inline-flex;
+    font-size: 13px;
+  }
+  &.muted {
+    color: #8d9c96;
+  }
 }
-// 홈 바로가기 (3열, 아이콘 + 이름)
+.icon-btn {
+  background: transparent;
+  color: #a0aca7;
+  padding: 4px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+
+  &:hover {
+    color: #c0546f;
+    background: #fff0f3;
+  }
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+    background: transparent;
+    color: #a0aca7;
+  }
+  &:not(.danger):hover:not(:disabled) {
+    color: $green;
+    background: #edf3f0;
+  }
+}
+.row-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    color: #8d9c96;
+    font-size: 11px;
+    padding: 3px 6px;
+    border-radius: 6px;
+
+    &:hover {
+      background: #edf3f0;
+      color: $green;
+    }
+  }
+}
+.pink-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  background: #dcf1f9;
+  color: #3f7f99;
+  padding: 8px 12px;
+  border-radius: 30px;
+}
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+// ── 홈 바로가기 (3열, 아이콘 + 이름) ──
 .quick {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -220,7 +534,7 @@ button {
     color: #653c4a;
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: $mobile) {
     gap: 8px;
 
     .tile {
@@ -237,18 +551,8 @@ button {
     }
   }
 }
-.section {
-  margin-top: 14px;
-}
-.text-btn {
-  background: transparent;
-  color: $green;
-  font-size: 13px;
-  font-weight: 800;
-  display: flex;
-  gap: 7px;
-  align-items: center;
-}
+
+// ── 일정 ──
 .schedule-list {
   display: grid;
   gap: 12px;
@@ -261,7 +565,18 @@ button {
   padding: 22px 24px;
   border: 1px solid #e9eee9;
   border-radius: 17px;
+
+  &.past {
+    opacity: 0.65;
+  }
+
+  @media (max-width: $mobile) {
+    gap: 12px;
+    padding: 15px;
+    flex-wrap: wrap;
+  }
 }
+// 날짜 박스 (일정·기록 공통)
 .date {
   background: #e6f5ed;
   border-radius: 13px;
@@ -269,77 +584,123 @@ button {
   min-width: 84px;
   text-align: center;
   color: $green;
-}
-.date b {
-  display: block;
-  font-size: 20px;
-}
-.date span {
-  font-size: 12px;
+
+  b {
+    display: block;
+    font-size: 20px;
+  }
+  span {
+    font-size: 12px;
+  }
+
+  @media (max-width: $mobile) {
+    min-width: 64px;
+    padding: 12px 7px;
+
+    b {
+      font-size: 16px;
+    }
+  }
 }
 .schedule-info {
   flex: 1;
+
+  h3 {
+    margin: 0 0 10px;
+    font-size: 17px;
+  }
+  p,
+  small {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #72817b;
+    font-size: 12px;
+    margin: 0 0 8px;
+  }
+  small {
+    margin: 0;
+
+    & + small {
+      margin-top: 6px;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    h3 {
+      font-size: 14px;
+    }
+    p {
+      flex-wrap: wrap;
+    }
+  }
 }
-.schedule-info h3 {
-  margin: 0 0 10px;
-  font-size: 17px;
+.rsvp {
+  text-align: right;
+
+  > span,
+  > small {
+    display: block;
+    color: #7b8a84;
+    font-size: 11px;
+    margin-bottom: 8px;
+  }
+  > small {
+    margin: 7px 0 0;
+  }
+  div {
+    display: flex;
+    gap: 5px;
+  }
+  button {
+    @extend %soft-btn;
+
+    &.selected {
+      background: $green;
+      color: white;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    width: 100%;
+    text-align: left;
+    padding-left: 76px;
+
+    div {
+      justify-content: start;
+    }
+  }
 }
-.schedule-info p,
-.schedule-info small {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #72817b;
-  font-size: 12px;
-  margin: 0 0 8px;
-}
-.schedule-info small {
-  margin: 0;
-}
-// ── 일정 상세 (모달) ──
+
+// ── 일정 상세 페이지 ──
 .clickable {
   cursor: pointer;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    border-color: $mint;
+    box-shadow: 0 6px 20px #1e292612;
+  }
 }
-.clickable:hover {
-  border-color: $mint;
-  box-shadow: 0 6px 20px #1e292612;
-}
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 30;
-  background: #1e292655;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-.modal {
-  position: relative;
-  width: min(560px, 100%);
-  max-height: 85vh;
-  overflow-y: auto;
-  background: white;
+.schedule-detail {
+  @include card;
   border-radius: 20px;
   padding: 26px;
-  box-shadow: 0 20px 50px #1e292633;
-}
-.modal-close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-}
-.schedule-detail h3 {
-  margin: 6px 0 12px;
-  font-size: 21px;
-}
-.schedule-detail > p {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 6px;
-  font-size: 13px;
-  color: #4b5d57;
+
+  h3 {
+    margin: 6px 0 12px;
+    font-size: 21px;
+  }
+  > p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    font-size: 13px;
+    color: #4b5d57;
+  }
 }
 .detail-label {
   display: flex;
@@ -356,61 +717,65 @@ button {
   display: grid;
   gap: 8px;
   counter-reset: item;
-}
-.detail-list li {
-  counter-increment: item;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid #e4eef2;
-  border-radius: 11px;
-  font-size: 13px;
-}
-.detail-list li::before {
-  content: counter(item);
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #dcf1f9;
-  color: #3f7f99;
-  font-size: 11px;
-  font-weight: 800;
-  display: grid;
-  place-items: center;
-}
-.detail-list .exercise-text {
-  flex: 1;
-}
-.detail-list small {
-  flex-shrink: 0;
-  color: #8b9792;
+
+  li {
+    counter-increment: item;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid #e4eef2;
+    border-radius: 11px;
+    font-size: 13px;
+
+    &::before {
+      content: counter(item);
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #dcf1f9;
+      color: #3f7f99;
+      font-size: 11px;
+      font-weight: 800;
+      display: grid;
+      place-items: center;
+    }
+  }
+  .exercise-text {
+    flex: 1;
+  }
+  small {
+    flex-shrink: 0;
+    color: #8b9792;
+  }
 }
 .vote-summary {
   display: grid;
   gap: 6px;
-}
-.vote-summary > div {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 11px;
-  background: #f6f8f7;
-  font-size: 13px;
-}
-.vote-summary .s-참석 {
-  background: #edf8f2;
+
+  > div {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 11px;
+    background: #f6f8f7;
+    font-size: 13px;
+  }
+  .s-참석 {
+    background: #edf8f2;
+
+    .vote-summary-head {
+      color: $green;
+    }
+  }
 }
 .vote-summary-head {
   flex-shrink: 0;
   width: 72px;
   font-weight: 700;
   color: #4b5d57;
-}
-.vote-summary .s-참석 .vote-summary-head {
-  color: $green;
 }
 .vote-summary-names {
   color: #4b5d57;
@@ -419,17 +784,6 @@ button {
 .detail-start {
   width: 100%;
   margin-top: 18px;
-}
-@media (max-width: 700px) {
-  // 모바일은 아래에서 올라오는 시트 형태
-  .modal-backdrop {
-    place-items: end center;
-    padding: 0;
-  }
-  .modal {
-    border-radius: 20px 20px 0 0;
-    padding: 22px 16px calc(22px + env(safe-area-inset-bottom));
-  }
 }
 
 // ── 홈 간단 일정 카드 ──
@@ -442,46 +796,78 @@ button {
   border-radius: 24px;
   padding: 20px 22px 20px 30px;
   box-shadow: 0 4px 16px #1e29260a;
-}
-.schedule-card .date {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 98px;
-  height: 92px;
-  padding: 0;
-  border-radius: 16px;
-  background: #e6f5ed;
-  color: $green;
-}
-.schedule-card .date b {
-  font-size: 23px;
-}
-.schedule-card .date span {
-  font-size: 14px;
-  margin-top: 6px;
+
+  .date {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 98px;
+    height: 92px;
+    padding: 0;
+    border-radius: 16px;
+    background: #e6f5ed;
+    color: $green;
+
+    b {
+      font-size: 23px;
+    }
+    span {
+      font-size: 14px;
+      margin-top: 6px;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    gap: 14px;
+    padding: 16px 14px;
+    border-radius: 20px;
+
+    .date {
+      width: 72px;
+      height: 72px;
+
+      b {
+        font-size: 18px;
+      }
+      span {
+        font-size: 12px;
+        margin-top: 3px;
+      }
+    }
+  }
 }
 .schedule-card-info {
   flex: 1;
   min-width: 0;
-}
-.schedule-card-info h3 {
-  margin: 0 0 12px;
-  font-size: 20px;
-  letter-spacing: -0.5px;
-}
-.schedule-card-info p {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 8px;
-  font-size: 15px;
-  color: #4b5d57;
-}
-.schedule-card-info svg {
-  color: #6b7280;
-  flex-shrink: 0;
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+  }
+  p {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 8px;
+    font-size: 15px;
+    color: #4b5d57;
+  }
+  svg {
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: $mobile) {
+    h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    p {
+      font-size: 13px;
+    }
+  }
 }
 // 홈 카드 참석자 이름
 .attendees {
@@ -491,27 +877,43 @@ button {
   gap: 8px;
   font-size: 15px;
   color: #4b5d57;
+
+  b {
+    color: #4b5d57;
+    margin: 0 4px 0 2px;
+  }
+  .none {
+    color: #8b9792;
+    margin-left: 2px;
+  }
+  .name-chip {
+    padding: 5px 13px;
+    border-radius: 20px;
+    background: #f1f2f1;
+    color: #2f3a37;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .more {
+    font-size: 13px;
+    color: #8b9792;
+  }
+
+  @media (max-width: $mobile) {
+    font-size: 13px;
+
+    .name-chip {
+      font-size: 12px;
+      padding: 4px 10px;
+    }
+  }
 }
-.attendees b {
-  color: #4b5d57;
-  margin: 0 4px 0 2px;
-}
-.attendees .none {
-  color: #8b9792;
-  margin-left: 2px;
-}
-.attendees .name-chip {
-  padding: 5px 13px;
-  border-radius: 20px;
-  background: #f1f2f1;
-  color: #2f3a37;
-  font-size: 14px;
-  font-weight: 600;
-}
-.attendees .more {
-  font-size: 13px;
-  color: #8b9792;
-}
+// 투표 결과 색 (홈 카드 배지와 선택지 공통): 배경, 글자
+$vote-colors: (
+  참석: (#d8f3e6, $green),
+  불참: (#fde8ec, #9a3550),
+  미정: (#edf0ef, #5d6e68),
+);
 .vote-pill {
   flex-shrink: 0;
   padding: 10px 18px;
@@ -519,560 +921,146 @@ button {
   font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
-}
-// 투표 전: 결과 배지와 같은 크기의 가벼운 점선 버튼
-.vote-pill.empty {
-  background: white;
-  border: 1px dashed #b9d3c9;
-  color: $green;
-  font-weight: 600;
-  transition: background 0.15s, border-color 0.15s;
-}
-.vote-pill.empty:hover {
-  background: #f1f8f5;
-  border-style: solid;
-  border-color: $green;
-}
-.vote-pill.s-참석,
-.vote-options .s-참석.selected {
-  background: #d8f3e6;
-  color: $green;
-}
-.vote-pill.s-불참,
-.vote-options .s-불참.selected {
-  background: #fde8ec;
-  color: #9a3550;
-}
-.vote-pill.s-미정,
-.vote-options .s-미정.selected {
-  background: #edf0ef;
-  color: #5d6e68;
+
+  // 투표 전: 결과 배지와 같은 크기의 가벼운 점선 버튼
+  &.empty {
+    background: white;
+    border: 1px dashed #b9d3c9;
+    color: $green;
+    font-weight: 600;
+    transition:
+      background 0.15s,
+      border-color 0.15s;
+
+    &:hover {
+      background: #f1f8f5;
+      border-style: solid;
+      border-color: $green;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
 }
 .vote-options {
   display: flex;
   gap: 6px;
   margin-top: 12px;
-}
-.vote-options button {
-  flex: 1;
-  padding: 9px 0;
-  border-radius: 10px;
-  border: 1px solid #dfe6e2;
-  background: white;
-  color: #54746b;
-  font-size: 13px;
-  font-weight: 700;
-}
-.vote-options button.selected {
-  border-color: transparent;
-}
-@media (max-width: 700px) {
-  .schedule-card {
-    gap: 14px;
-    padding: 16px 14px;
-    border-radius: 20px;
-  }
-  .schedule-card .date {
-    width: 72px;
-    height: 72px;
-  }
-  .schedule-card .date b {
-    font-size: 18px;
-  }
-  .schedule-card .date span {
-    font-size: 12px;
-    margin-top: 3px;
-  }
-  .schedule-card-info h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  .schedule-card-info p,
-  .attendees {
+
+  button {
+    flex: 1;
+    padding: 9px 0;
+    border-radius: 10px;
+    border: 1px solid #dfe6e2;
+    background: white;
+    color: #54746b;
     font-size: 13px;
-  }
-  .attendees .name-chip {
-    font-size: 12px;
-    padding: 4px 10px;
-  }
-  .vote-pill {
-    padding: 8px 12px;
-    font-size: 13px;
+    font-weight: 700;
+
+    &.selected {
+      border-color: transparent;
+    }
   }
 }
-.rsvp {
-  text-align: right;
+@each $status, $colors in $vote-colors {
+  .vote-pill.s-#{$status},
+  .vote-options .s-#{$status}.selected {
+    background: list.nth($colors, 1);
+    color: list.nth($colors, 2);
+  }
 }
-.rsvp > span,
-.rsvp > small {
-  display: block;
-  color: #7b8a84;
-  font-size: 11px;
-  margin-bottom: 8px;
-}
-.rsvp > small {
-  margin: 7px 0 0;
-}
-.rsvp div {
-  display: flex;
-  gap: 5px;
-}
-.rsvp button,
-.outline {
-  padding: 9px 12px;
-  background: #edf3f0;
-  border-radius: 9px;
-  color: #54746b;
-  font-size: 12px;
-}
-.rsvp button.selected {
-  background: $green;
-  color: white;
-}
-.pink-tag {
-  font-size: 11px;
-  background: #dcf1f9;
-  color: #3f7f99;
-  padding: 8px 12px;
-  border-radius: 30px;
-}
+
+// ── 훈련 체크리스트 ──
 .training {
-  background: white;
-  border: 1px solid #e4eef2;
+  @include card;
   border-radius: 20px;
   padding: 26px;
+
+  @media (max-width: $mobile) {
+    padding: 17px;
+  }
 }
 .training-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.training-head b {
-  font-size: 18px;
-}
-.training-head p {
-  font-size: 13px;
-  color: #81918a;
+
+  b {
+    font-size: 18px;
+  }
+  p {
+    font-size: 13px;
+    color: #81918a;
+  }
 }
 .progress {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #3d86a6;
-}
-.progress b {
-  font-size: 24px;
-}
-.progress span {
-  font-size: 12px;
+
+  b {
+    font-size: 24px;
+  }
+  span {
+    font-size: 12px;
+  }
 }
 .bar {
   background: #e3f2f8;
   border-radius: 8px;
   height: 8px;
   margin: 16px 0;
-}
-.bar div {
-  height: 100%;
-  border-radius: 8px;
-  background: $ice;
-  transition: width 0.2s;
+
+  div {
+    height: 100%;
+    border-radius: 8px;
+    background: $ice;
+    transition: width 0.2s;
+  }
 }
 .exercise-list {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 9px;
-}
-.exercise-list label {
-  border: 1px solid #e4eef2;
-  border-radius: 11px;
-  padding: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-}
-.exercise-list input {
-  accent-color: #5fb8d8;
-  width: 17px;
-  height: 17px;
-}
-.exercise-list small {
-  margin-left: auto;
-  color: #8b9792;
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-.stats > div {
-  background: white;
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.stats svg {
-  color: $green;
-}
-.stats b {
-  font-size: 29px;
-}
-.stats span {
-  font-size: 12px;
-  color: #7b8a84;
-}
-footer {
-  text-align: center;
-  padding: 60px 0 90px;
-  font-size: 11px;
-  color: #a2aea8;
-  letter-spacing: 1px;
-}
-@media (max-width: 700px) {
-  .container {
-    width: min(100% - 28px, 500px);
+
+  label {
+    border: 1px solid #e4eef2;
+    border-radius: 11px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
   }
-  .head {
-    height: 64px;
+  input {
+    accent-color: #5fb8d8;
+    width: 17px;
+    height: 17px;
   }
-  .brand {
-    font-size: 19px;
+  small {
+    margin-left: auto;
+    color: #8b9792;
   }
-  .brand-icon {
-    font-size: 19px;
-    padding: 8px;
+  .exercise-row {
+    border: 1px solid #e4eef2;
+    border-radius: 11px;
+    padding: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+
+    small {
+      flex-shrink: 0;
+    }
   }
-  // 모바일은 플로팅 메뉴만 사용
-  .head nav {
-    display: none;
-  }
-  .avatar {
-    width: 34px;
-    height: 34px;
-    font-size: 11px;
-  }
-  .hero {
-    margin-top: 16px;
-    min-height: 235px;
-    padding: 28px 24px;
-  }
-  .hero h1 {
-    font-size: 30px;
-  }
-  .hero p {
-    font-size: 12px;
-  }
-  .hero-art {
-    position: absolute;
-    right: 0;
-    bottom: 10px;
-    opacity: 1;
-  }
-  .hero-art span {
-    font-size: 100px;
-  }
-  .hero-btn {
-    position: relative;
-    z-index: 2;
-  }
-  .section-title h2 {
-    font-size: 21px;
-  }
-  .schedule {
-    gap: 12px;
-    padding: 15px;
-    flex-wrap: wrap;
-  }
-  .date {
-    min-width: 64px;
-    padding: 12px 7px;
-  }
-  .date b {
-    font-size: 16px;
-  }
-  .schedule-info h3 {
-    font-size: 14px;
-  }
-  .schedule-info p {
-    flex-wrap: wrap;
-  }
-  .rsvp {
-    width: 100%;
-    text-align: left;
-    padding-left: 76px;
-  }
-  .rsvp div {
-    justify-content: start;
-  }
-  .exercise-list {
+
+  @media (max-width: $mobile) {
     grid-template-columns: 1fr;
   }
-  .training {
-    padding: 17px;
-  }
-  .stats {
-    gap: 8px;
-  }
-  .stats > div {
-    padding: 16px;
-  }
-  .stats b {
-    font-size: 23px;
-  }
-}
-
-// ── 데이터 입력 UI ──
-input {
-  font: inherit;
-  color: $ink;
-}
-.primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: $green;
-  color: white;
-  border-radius: 10px;
-  padding: 10px 15px;
-  font-size: 13px;
-  font-weight: 800;
-}
-.primary:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-.icon-btn {
-  background: transparent;
-  color: #a0aca7;
-  padding: 4px;
-  border-radius: 7px;
-  display: grid;
-  place-items: center;
-}
-.icon-btn:hover {
-  color: #c0546f;
-  background: #fff0f3;
-}
-.demo-note.warn {
-  background: #fff4e0;
-  color: #7a5a1d;
-}
-.demo-note.error {
-  background: #fde8ec;
-  color: #9a3550;
-}
-.demo-note code {
-  font-size: 11px;
-  background: #ffffff99;
-  padding: 1px 5px;
-  border-radius: 5px;
-}
-.member-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  background: white;
-  border: 1px solid #e9eee9;
-  border-radius: 12px;
-  padding: 10px 15px;
-  margin-top: 10px;
-  font-size: 13px;
-  color: #5d6e68;
-}
-.member-bar b {
-  color: $green;
-}
-.inline-form {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.inline-form input,
-.form-card input {
-  border: 1px solid #dfe6e2;
-  border-radius: 9px;
-  padding: 9px 11px;
-  font-size: 13px;
-  background: white;
-  min-width: 0;
-}
-.inline-form input:focus,
-.form-card input:focus {
-  outline: 2px solid $mint;
-  border-color: $green;
-}
-.form-card {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  background: white;
-  border: 1.5px solid $mint;
-  border-radius: 17px;
-  padding: 20px 22px;
-  margin-bottom: 12px;
-}
-.form-card label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #5d6e68;
-}
-.form-card .wide {
-  grid-column: 1/-1;
-}
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.empty {
-  background: white;
-  border: 1px dashed #d9e2dd;
-  border-radius: 14px;
-  padding: 22px;
-  text-align: center;
-  font-size: 13px;
-  color: #86958f;
-}
-.schedule.past {
-  opacity: 0.65;
-}
-.row-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-}
-.row-actions button {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  color: #8d9c96;
-  font-size: 11px;
-  padding: 3px 6px;
-  border-radius: 6px;
-}
-.row-actions button:hover {
-  background: #edf3f0;
-  color: $green;
-}
-.exercise-list .exercise-row {
-  border: 1px solid #e4eef2;
-  border-radius: 11px;
-  padding: 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-}
-.save-log {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 12px;
-  font-size: 13px;
-  color: $green;
-  font-weight: 700;
-}
-.log-list {
-  display: grid;
-  gap: 10px;
-}
-.log-list article {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  background: white;
-  border: 1px solid #e9eee9;
-  border-radius: 15px;
-  padding: 16px 20px;
-}
-.log-list .date {
-  min-width: 70px;
-  padding: 11px;
-}
-.log-list .date b {
-  font-size: 16px;
-}
-.log-info {
-  flex: 1;
-  min-width: 0;
-}
-.log-info b {
-  font-size: 15px;
-}
-.log-info p {
-  margin: 5px 0 0;
-  font-size: 12px;
-  color: #7b8a84;
-}
-@media (max-width: 700px) {
-  .form-card {
-    grid-template-columns: 1fr 1fr;
-    padding: 16px;
-  }
-  .form-card label:nth-child(2) {
-    grid-column: 1/-1;
-  }
-  .member-bar .inline-form {
-    width: 100%;
-  }
-  .member-bar .inline-form input {
-    flex: 1;
-  }
-  .log-list article {
-    gap: 12px;
-    padding: 13px;
-  }
-}
-
-// ── 훈련 프로그램 편집 페이지 ──
-.back {
-  margin-top: 30px;
-}
-.form-label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-.exercise-form input:first-child {
-  flex: 1;
-}
-.exercise-form input[type="number"] {
-  width: 72px;
-}
-.exercise-form span {
-  font-size: 12px;
-  color: #8b9792;
-}
-.exercise-form {
-  flex-wrap: wrap;
-}
-.exercise-form .exercise-desc {
-  order: 1;
-  flex-basis: 100%;
-  font: inherit;
-  font-size: 13px;
-  border: 1px solid #dfe6e2;
-  border-radius: 9px;
-  padding: 9px 11px;
-  resize: vertical;
-}
-// 이름·횟수 → 설명 → 버튼 순서
-.exercise-form button {
-  order: 2;
-}
-.exercise-form .exercise-desc:focus {
-  outline: 2px solid $mint;
-  border-color: $green;
 }
 // 훈련명 + 부가설명
 .exercise-text {
@@ -1080,145 +1068,22 @@ input {
   flex-direction: column;
   gap: 3px;
   min-width: 0;
-}
-.exercise-text span {
-  font-size: 12px;
-  line-height: 1.5;
-  color: #7b8a84;
-}
-.exercise-list .exercise-row {
-  align-items: flex-start;
-}
-.exercise-list .exercise-row small {
-  flex-shrink: 0;
-}
-// 훈련 짜기: 변경 사항을 한 번에 저장하는 하단 바 (오른쪽은 플로팅 버튼 자리)
-.save-bar {
-  position: sticky;
-  bottom: 16px;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 16px 84px 0 0;
-  padding: 12px 14px;
-  background: white;
-  border: 1px solid #e4eef2;
-  border-radius: 14px;
-  box-shadow: 0 6px 20px #1e292614;
-}
-.save-bar span {
-  flex: 1;
-  font-size: 13px;
-  color: #8b9792;
-}
-.save-bar.dirty {
-  border-color: $ice;
-}
-.save-bar.dirty span {
-  color: #3f7f99;
-  font-weight: 700;
-}
-.save-bar button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-.save-bar .primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-@media (max-width: 700px) {
-  .save-bar {
-    margin-right: 72px;
-    flex-wrap: wrap;
-  }
-  .save-bar span {
-    flex-basis: 100%;
-  }
-}
-.manage-list {
-  display: grid;
-  gap: 8px;
-  margin-top: 14px;
-}
-.manage-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: white;
-  border: 1px solid #e4eef2;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 14px;
-}
-.manage-row.editing {
-  border-color: $ice;
-}
-.manage-row.editing form {
-  flex: 1;
-}
-.manage-row .order {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #dcf1f9;
-  color: #3f7f99;
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-.manage-row .name {
-  flex: 1;
-  min-width: 0;
-}
-.manage-row small {
-  color: #8b9792;
-}
-.row-tools {
-  display: flex;
-  gap: 2px;
-}
-.icon-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-  background: transparent;
-  color: #a0aca7;
-}
-.icon-btn:not(.danger):hover:not(:disabled) {
-  color: $green;
-  background: #edf3f0;
-}
-@media (max-width: 700px) {
-  .exercise-form {
-    flex-wrap: wrap;
-  }
-  .manage-row {
-    flex-wrap: wrap;
-  }
-  .manage-row .name {
-    flex-basis: calc(100% - 100px);
-  }
-  .row-tools {
-    width: 100%;
-    justify-content: flex-end;
-  }
-}
 
-// ── 일정별 훈련 ──
-.section-title .sub {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: #7b8a84;
+  span {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #7b8a84;
+  }
 }
-.copy-default {
-  margin-top: 12px;
-}
-.text-btn.inline {
-  display: inline-flex;
+.save-log {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
   font-size: 13px;
+  color: $green;
+  font-weight: 700;
 }
 // 훈련 프로그램 선택: 팀 훈련은 초록, 내 훈련은 파랑
 .program-picker {
@@ -1232,10 +1097,11 @@ input {
   background: var(--tone-soft);
   border-radius: 14px;
   padding: 12px;
-}
-.program-group.mine {
-  --tone: #3d86a6;
-  --tone-soft: #f1f9fc;
+
+  &.mine {
+    --tone: #3d86a6;
+    --tone-soft: #f1f9fc;
+  }
 }
 .program-group-label {
   display: flex;
@@ -1263,25 +1129,147 @@ input {
   font-size: 14px;
   font-weight: 700;
   text-align: left;
-}
-.program-chip.active {
-  background: var(--tone);
-  color: white;
-}
-.program-chip.add {
-  background: transparent;
-  border: 1.5px dashed var(--tone);
-  color: var(--tone);
-}
-.schedule-info small + small {
-  margin-top: 6px;
-}
-.log-schedule {
-  color: $green !important;
-  font-weight: 700;
+
+  &.active {
+    background: var(--tone);
+    color: white;
+  }
+  &.add {
+    background: transparent;
+    border: 1.5px dashed var(--tone);
+    color: var(--tone);
+  }
 }
 
-// ── 로그인 ──
+// ── 통계 ──
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+
+  > div {
+    @include card;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  svg {
+    color: $green;
+  }
+  b {
+    font-size: 29px;
+  }
+  span {
+    font-size: 12px;
+    color: #7b8a84;
+  }
+
+  @media (max-width: $mobile) {
+    gap: 8px;
+
+    > div {
+      padding: 16px;
+    }
+    b {
+      font-size: 23px;
+    }
+  }
+}
+
+// ── 입력 폼 ──
+.inline-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inline-form,
+.form-card {
+  input {
+    border: 1px solid #dfe6e2;
+    border-radius: 9px;
+    padding: 9px 11px;
+    font-size: 13px;
+    background: white;
+    min-width: 0;
+
+    &:focus {
+      outline: 2px solid $mint;
+      border-color: $green;
+    }
+  }
+}
+.form-card {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: white;
+  border: 1.5px solid $mint;
+  border-radius: 17px;
+  padding: 20px 22px;
+  margin-bottom: 12px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #5d6e68;
+  }
+  .wide {
+    grid-column: 1/-1;
+  }
+
+  @media (max-width: $mobile) {
+    grid-template-columns: 1fr 1fr;
+    padding: 16px;
+
+    label:nth-child(2) {
+      grid-column: 1/-1;
+    }
+  }
+}
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+// ── 로그인 / 회원 줄 ──
+.member-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  @include card;
+  border-radius: 12px;
+  padding: 10px 15px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #5d6e68;
+
+  b {
+    color: $green;
+  }
+  small {
+    color: #9aa7a2;
+    margin-left: 6px;
+    font-size: 11px;
+  }
+
+  @media (max-width: $mobile) {
+    .inline-form {
+      width: 100%;
+
+      input {
+        flex: 1;
+      }
+    }
+  }
+}
 .auth {
   max-width: 460px;
   margin-left: auto;
@@ -1289,10 +1277,11 @@ input {
 }
 .auth-card {
   grid-template-columns: 1fr;
-}
-.auth-card .form-actions {
-  justify-content: space-between;
-  align-items: center;
+
+  .form-actions {
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 .auth-msg {
   margin: 0;
@@ -1302,24 +1291,215 @@ input {
   border-radius: 9px;
   padding: 10px 12px;
   line-height: 1.5;
-}
-.auth-msg.error {
-  color: #9a3550;
-  background: #fde8ec;
-}
-.member-bar small {
-  color: #9aa7a2;
-  margin-left: 6px;
-  font-size: 11px;
-}
-.text-btn.muted {
-  color: #8d9c96;
+
+  &.error {
+    color: #9a3550;
+    background: #fde8ec;
+  }
 }
 
-.hero-img {
-  width: 240px;
-  max-width: 100%;
-  z-index: 1;
+// ── 훈련 기록 ──
+.log-list {
+  display: grid;
+  gap: 10px;
+
+  article {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: white;
+    border: 1px solid #e9eee9;
+    border-radius: 15px;
+    padding: 16px 20px;
+  }
+  .date {
+    min-width: 70px;
+    padding: 11px;
+
+    b {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    article {
+      gap: 12px;
+      padding: 13px;
+    }
+  }
+}
+.log-info {
+  flex: 1;
+  min-width: 0;
+
+  b {
+    font-size: 15px;
+  }
+  p {
+    margin: 5px 0 0;
+    font-size: 12px;
+    color: #7b8a84;
+  }
+}
+.log-schedule {
+  color: $green !important;
+  font-weight: 700;
+
+  &.private {
+    color: #3d86a6 !important;
+  }
+}
+
+// ── 훈련 프로그램 편집 페이지 ──
+.back {
+  margin-top: 30px;
+}
+.copy-default {
+  margin-top: 12px;
+}
+.form-label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.exercise-form {
+  flex-wrap: wrap;
+
+  input:first-child {
+    flex: 1;
+  }
+  input[type="number"] {
+    width: 72px;
+  }
+  span {
+    font-size: 12px;
+    color: #8b9792;
+  }
+  .exercise-desc {
+    order: 1;
+    flex-basis: 100%;
+    font: inherit;
+    font-size: 13px;
+    border: 1px solid #dfe6e2;
+    border-radius: 9px;
+    padding: 9px 11px;
+    resize: vertical;
+
+    &:focus {
+      outline: 2px solid $mint;
+      border-color: $green;
+    }
+  }
+  // 이름·횟수 → 설명 → 버튼 순서
+  button {
+    order: 2;
+  }
+}
+// 훈련 짜기: 변경 사항을 한 번에 저장하는 하단 바 (오른쪽은 플로팅 버튼 자리)
+.save-bar {
+  position: sticky;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 84px 0 0;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #e4eef2;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px #1e292614;
+
+  span {
+    flex: 1;
+    font-size: 13px;
+    color: #8b9792;
+  }
+  &.dirty {
+    border-color: $ice;
+
+    span {
+      color: #3f7f99;
+      font-weight: 700;
+    }
+  }
+  button:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+  .primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  @media (max-width: $mobile) {
+    margin-right: 72px;
+    flex-wrap: wrap;
+
+    span {
+      flex-basis: 100%;
+    }
+  }
+}
+.manage-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+.manage-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid #e4eef2;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+
+  &.editing {
+    border-color: $ice;
+
+    form {
+      flex: 1;
+    }
+  }
+  .order {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #dcf1f9;
+    color: #3f7f99;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .name {
+    flex: 1;
+    min-width: 0;
+  }
+  small {
+    color: #8b9792;
+  }
+
+  @media (max-width: $mobile) {
+    flex-wrap: wrap;
+
+    .name {
+      flex-basis: calc(100% - 100px);
+    }
+  }
+}
+.row-tools {
+  display: flex;
+  gap: 2px;
+
+  @media (max-width: $mobile) {
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 // ── 플로팅 메뉴 ──
@@ -1334,6 +1514,11 @@ input {
   gap: 12px;
   // 닫힌 메뉴 영역이 아래 버튼들의 클릭을 가로막지 않도록 토글 버튼만 클릭 받음
   pointer-events: none;
+
+  @media (max-width: $mobile) {
+    right: 16px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+  }
 }
 .fab-toggle {
   pointer-events: auto;
@@ -1345,14 +1530,17 @@ input {
   display: grid;
   place-items: center;
   box-shadow: 0 8px 22px #006b5055;
-  transition: transform 0.2s, background 0.2s;
-}
-.fab-toggle:hover {
-  transform: scale(1.05);
-}
-.fab.open .fab-toggle {
-  background: $ink;
-  transform: rotate(90deg);
+  transition:
+    transform 0.2s,
+    background 0.2s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+  .fab.open & {
+    background: $ink;
+    transform: rotate(90deg);
+  }
 }
 .fab-menu {
   list-style: none;
@@ -1363,52 +1551,52 @@ input {
   align-items: flex-end;
   gap: 9px;
   pointer-events: none;
-}
-.fab.open .fab-menu {
-  pointer-events: auto;
-}
-.fab-menu li {
-  opacity: 0;
-  transform: translateY(12px) scale(0.95);
-  transition: opacity 0.18s, transform 0.18s;
-}
-.fab.open .fab-menu li {
-  opacity: 1;
-  transform: none;
-}
-.fab-menu button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: white;
-  color: #4b5d57;
-  border-radius: 30px;
-  padding: 11px 16px 11px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  box-shadow: 0 4px 16px #1e292622;
-}
-.fab-menu button svg {
-  color: $green;
-}
-.fab-menu button.active {
-  background: $green;
-  color: white;
-}
-.fab-menu button.active svg {
-  color: white;
+
+  li {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+    transition:
+      opacity 0.18s,
+      transform 0.18s;
+  }
+  .fab.open & {
+    pointer-events: auto;
+
+    li {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    color: #4b5d57;
+    border-radius: 30px;
+    padding: 11px 16px 11px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 16px #1e292622;
+
+    svg {
+      color: $green;
+    }
+    &.active {
+      background: $green;
+      color: white;
+
+      svg {
+        color: white;
+      }
+    }
+  }
 }
 .fab-backdrop {
   position: fixed;
   inset: 0;
   z-index: 19;
   background: #1e292633;
-}
-@media (max-width: 700px) {
-  .fab {
-    right: 16px;
-    bottom: max(16px, env(safe-area-inset-bottom));
-  }
 }
 
 // ── 회원 권한 ──
@@ -1421,26 +1609,30 @@ input {
   margin-left: 6px;
   background: #edf3f0;
   color: #54746b;
+
+  &.admin {
+    background: $green;
+    color: white;
+  }
 }
-.role-badge.admin {
-  background: $green;
-  color: white;
-}
-.member-row .order {
-  background: $mint;
-  color: $green;
-}
-.member-row .outline:disabled {
-  opacity: 0.4;
-  cursor: default;
+.member-row {
+  .order {
+    background: $mint;
+    color: $green;
+  }
+  .outline:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  @media (max-width: $mobile) {
+    small {
+      display: none;
+    }
+  }
 }
 
 // ── 마이 보드 ──
-.pink-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
 .my-upcoming {
   display: grid;
   gap: 8px;
@@ -1456,28 +1648,35 @@ input {
   border: 1px solid #e9eee9;
   border-radius: 13px;
   padding: 14px 18px;
-}
-.my-upcoming-row:hover {
-  border-color: $mint;
-}
-.my-upcoming-row .when {
-  color: $green;
-  font-weight: 800;
-  font-size: 13px;
-  min-width: 78px;
-}
-.my-upcoming-row .what {
-  flex: 1;
-  min-width: 0;
-  font-size: 14px;
-  font-weight: 700;
-}
-.my-upcoming-row .what small {
-  display: block;
-  font-weight: 400;
-  font-size: 12px;
-  color: #7b8a84;
-  margin-top: 3px;
+
+  &:hover {
+    border-color: $mint;
+  }
+  .when {
+    color: $green;
+    font-weight: 800;
+    font-size: 13px;
+    min-width: 78px;
+  }
+  .what {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+
+    small {
+      display: block;
+      font-weight: 400;
+      font-size: 12px;
+      color: #7b8a84;
+      margin-top: 3px;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    gap: 10px;
+    padding: 12px 14px;
+  }
 }
 .status {
   font-style: normal;
@@ -1487,18 +1686,19 @@ input {
   border-radius: 20px;
   background: #edf3f0;
   color: #54746b;
-}
-.status.s-참석 {
-  background: $green;
-  color: white;
-}
-.status.s-불참 {
-  background: #fde8ec;
-  color: #9a3550;
-}
-.status.none {
-  background: #fff4e0;
-  color: #7a5a1d;
+
+  &.s-참석 {
+    background: $green;
+    color: white;
+  }
+  &.s-불참 {
+    background: #fde8ec;
+    color: #9a3550;
+  }
+  &.none {
+    background: #fff4e0;
+    color: #7a5a1d;
+  }
 }
 .my-notes .goal-head {
   display: flex;
@@ -1506,10 +1706,11 @@ input {
   align-items: center;
   font-size: 13px;
   color: #3d86a6;
-}
-.my-notes .goal-head b {
-  font-size: 16px;
-  color: $ink;
+
+  b {
+    font-size: 16px;
+    color: $ink;
+  }
 }
 .goal-input {
   display: flex;
@@ -1517,12 +1718,18 @@ input {
   gap: 8px;
   font-size: 13px;
   color: #5d6e68;
-}
-.goal-input input {
-  width: 70px;
-  border: 1px solid #dfe6e2;
-  border-radius: 9px;
-  padding: 8px 10px;
+
+  input {
+    width: 70px;
+    border: 1px solid #dfe6e2;
+    border-radius: 9px;
+    padding: 8px 10px;
+
+    &:focus {
+      outline: 2px solid $mint;
+      border-color: $green;
+    }
+  }
 }
 .memo {
   display: flex;
@@ -1532,62 +1739,25 @@ input {
   font-size: 12px;
   font-weight: 700;
   color: #5d6e68;
-}
-.memo textarea {
-  font: inherit;
-  font-size: 14px;
-  font-weight: 400;
-  color: $ink;
-  border: 1px solid #dfe6e2;
-  border-radius: 11px;
-  padding: 12px;
-  resize: vertical;
-}
-.goal-input input:focus,
-.memo textarea:focus {
-  outline: 2px solid $mint;
-  border-color: $green;
-}
-@media (max-width: 700px) {
-  .member-row small {
-    display: none;
-  }
-  .my-upcoming-row {
-    gap: 10px;
-    padding: 12px 14px;
+
+  textarea {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    color: $ink;
+    border: 1px solid #dfe6e2;
+    border-radius: 11px;
+    padding: 12px;
+    resize: vertical;
+
+    &:focus {
+      outline: 2px solid $mint;
+      border-color: $green;
+    }
   }
 }
 
-// ── 나만의 훈련 ──
-.save-log {
-  margin-top: 16px;
-}
-.log-schedule.private {
-  color: #3d86a6 !important;
-}
-
-// ── 헤더 메뉴(PC) 와 아바타 간격 ──
-.head nav + .avatar {
-  margin-left: 0;
-}
-@media (max-width: 700px) {
-  .head nav + .avatar {
-    margin-left: auto;
-  }
-}
-
-// ── 내 훈련 만들기 버튼 / 루틴 목록 ──
-.title-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-.primary.soft {
-  background: #dcf1f9;
-  color: #3f7f99;
-}
+// ── 내 훈련 루틴 목록 ──
 .my-routines {
   display: flex;
   align-items: center;
@@ -1599,42 +1769,46 @@ input {
   margin-bottom: 12px;
   font-size: 13px;
   color: #3f7f99;
-}
-.my-routines > span {
-  font-weight: 800;
-  margin-right: 4px;
-}
-.my-routines small {
-  color: #7f9ba6;
-}
-.my-routines button {
-  background: white;
-  color: #3f7f99;
-  border: 1px solid #c9e7f3;
-  border-radius: 20px;
-  padding: 6px 13px;
-  font-size: 13px;
-  font-weight: 700;
-}
-.my-routines button:hover {
-  background: #dcf1f9;
+
+  > span {
+    font-weight: 800;
+    margin-right: 4px;
+  }
+  small {
+    color: #7f9ba6;
+  }
+  button {
+    background: white;
+    color: #3f7f99;
+    border: 1px solid #c9e7f3;
+    border-radius: 20px;
+    padding: 6px 13px;
+    font-size: 13px;
+    font-weight: 700;
+
+    &:hover {
+      background: #dcf1f9;
+    }
+  }
 }
 // 루틴 이름 + 삭제(X)를 한 칩으로
 .routine-chip {
   display: inline-flex;
-}
-.routine-chip button:first-child {
-  border-radius: 20px 0 0 20px;
-  border-right: 0;
-  padding-right: 8px;
-}
-.routine-chip .chip-remove {
-  display: grid;
-  place-items: center;
-  border-radius: 0 20px 20px 0;
-  padding: 6px 10px 6px 6px;
-  color: #8ab4c4;
-}
-.routine-chip .chip-remove:hover {
-  color: #d1435b;
+
+  button:first-child {
+    border-radius: 20px 0 0 20px;
+    border-right: 0;
+    padding-right: 8px;
+  }
+  .chip-remove {
+    display: grid;
+    place-items: center;
+    border-radius: 0 20px 20px 0;
+    padding: 6px 10px 6px 6px;
+    color: #8ab4c4;
+
+    &:hover {
+      color: #d1435b;
+    }
+  }
 }

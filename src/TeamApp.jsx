@@ -9,6 +9,7 @@ import SchedulePage from './pages/SchedulePage';
 import TrainingPage from './pages/TrainingPage';
 import RecordsPage from './pages/RecordsPage';
 import ExercisesPage from './pages/ExercisesPage';
+import ScheduleDetailPage from './pages/ScheduleDetailPage';
 import MembersPage from './pages/MembersPage';
 import useTable from './hooks/useTable';
 import { today } from './lib/format';
@@ -91,6 +92,14 @@ export default function TeamApp({ auth }) {
     setTab('훈련 편집');
   };
 
+  // 일정 상세 페이지 대상과 들어온 탭 (메뉴 활성 표시용)
+  const [detailTarget, setDetailTarget] = useState({ id: null, returnTab: '일정' });
+  const openScheduleDetail = (id) => {
+    setDetailTarget({ id, returnTab: tab });
+    setTab('일정 상세');
+    window.scrollTo({ top: 0 });
+  };
+
   // 새 내 훈련 루틴을 만들고 선택한 뒤 바로 편집 화면으로
   const createPersonalProgram = async () => {
     const title = prompt('새 내 훈련 루틴 이름', '내 훈련 루틴')?.trim();
@@ -133,6 +142,8 @@ export default function TeamApp({ auth }) {
     openProgramEditor,
     createPersonalProgram,
     editTarget,
+    openScheduleDetail,
+    detailTarget,
     logs,
     profiles,
     notes,
@@ -154,8 +165,8 @@ export default function TeamApp({ auth }) {
   ]
     .map((t) => t.error)
     .find(Boolean);
-  // '훈련 편집'은 하위 페이지라 메뉴에서는 들어온 탭을 활성으로 표시
-  const navTab = tab === '훈련 편집' ? editTarget.returnTab : tab;
+  // '훈련 편집'·'일정 상세'는 하위 페이지라 메뉴에서는 들어온 탭을 활성으로 표시
+  const navTab = { '훈련 편집': editTarget.returnTab, '일정 상세': detailTarget.returnTab }[tab] ?? tab;
   // 권한 없는 화면은 열리지 않도록 (회원은 내 루틴 편집만 가능)
   const blocked =
     (tab === '회원' && !me.isAdmin) || (tab === '훈련 편집' && !canEditSource(editTarget.source, me));
@@ -163,11 +174,13 @@ export default function TeamApp({ auth }) {
 
   return (
     <>
-      <Header tab={navTab} setTab={setTab} memberName={me.name} isAdmin={me.isAdmin} />
+      <Header tab={navTab} setTab={setTab} memberName={me.name} isAdmin={me.isAdmin} onSignOut={auth.signOut} />
       <main className="container">
-        <Hero onCta={() => setTab('일정')} />
+        {/* 히어로는 홈에서만 (다른 화면은 내용을 바로 보이게) */}
+        {page === '홈' && <Hero onCta={() => setTab('일정')} />}
         {error && <div className="demo-note error">저장소 오류 · {error}</div>}
-        <MemberBar auth={auth} me={me} onRenamed={(name) => profiles.update(me.id, { name })} />
+        {/* 로그인 정보(이름 변경·로그아웃)는 마이 보드에서만. 다른 화면은 상단 아바타로 이름만 확인 */}
+        {page === '기록' && <MemberBar auth={auth} me={me} onRenamed={(name) => profiles.update(me.id, { name })} />}
         {/* 훈련 편집은 페이지 안에 자체 돌아가기 버튼이 있음 */}
         {page !== '홈' && page !== '훈련 편집' && (
           <button className="text-btn back" onClick={goBack}>
@@ -179,6 +192,7 @@ export default function TeamApp({ auth }) {
         {page === '훈련' && <TrainingPage {...shared} />}
         {page === '기록' && <RecordsPage {...shared} />}
         {page === '훈련 편집' && <ExercisesPage {...shared} />}
+        {page === '일정 상세' && <ScheduleDetailPage {...shared} />}
         {page === '회원' && <MembersPage {...shared} />}
       </main>
       <footer>HARMONY MONY · 함께 뛰는 즐거움</footer>

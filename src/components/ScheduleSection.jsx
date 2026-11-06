@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { ArrowRight, ClipboardList, Clock3, MapPin, Pencil, Plus, Trash2, Users } from 'lucide-react';
 import ScheduleForm from './ScheduleForm';
-import ScheduleDetail from './ScheduleDetail';
 import { RSVP_LABELS, RSVP_OPTIONS } from '../lib/constants';
 import { formatDate, formatTimeRange, weekday } from '../lib/format';
 
@@ -22,20 +21,11 @@ export default function ScheduleSection({
   attendances,
   programFor,
   openProgramEditor,
-  setTrainingSource,
+  openScheduleDetail,
 }) {
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [votingId, setVotingId] = useState(null);
-  const [detailId, setDetailId] = useState(null);
-  const detail = detailId && schedules.rows.find((s) => s.id === detailId);
-
-  const startTraining = (id) => {
-    setDetailId(null);
-    setTrainingSource({ kind: 'schedule', id });
-    setTab('훈련');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
   const shown = limit ? items.slice(0, limit) : items;
 
   const setRsvp = (scheduleId, status) =>
@@ -94,7 +84,7 @@ export default function ScheduleSection({
           if (compact) {
             const voting = votingId === s.id;
             return (
-              <article className="schedule-card clickable" key={s.id} onClick={() => setDetailId(s.id)}>
+              <article className="schedule-card clickable" key={s.id} onClick={() => openScheduleDetail(s.id)}>
                 <div className="date">
                   <b>{formatDate(s.date)}</b>
                   <span>{weekday(s.date)}요일</span>
@@ -154,7 +144,7 @@ export default function ScheduleSection({
             );
           }
           return (
-            <article className={`schedule clickable${isPast ? ' past' : ''}`} key={s.id} onClick={() => setDetailId(s.id)}>
+            <article className={`schedule clickable${isPast ? ' past' : ''}`} key={s.id} onClick={() => openScheduleDetail(s.id)}>
               <div className="date">
                 <b>{formatDate(s.date)}</b>
                 <span>{weekday(s.date)}요일</span>
@@ -205,15 +195,6 @@ export default function ScheduleSection({
           );
         })}
       </div>
-      {detail && (
-        <ScheduleDetail
-          schedule={detail}
-          items={programFor({ kind: 'schedule', id: detail.id })}
-          votes={attendances.rows.filter((a) => a.schedule_id === detail.id)}
-          onClose={() => setDetailId(null)}
-          onStart={() => startTraining(detail.id)}
-        />
-      )}
     </section>
   );
 }
